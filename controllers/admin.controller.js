@@ -28,12 +28,12 @@ routes.createUser = async (req, res) => {
     const user = await adminModel.findOne({ email });
 
     if (user) {
-      return res.status(404).json("email already exists");
+      return res.status(404).json({ error: "email already exists" });
     }
 
     const newUser = await adminModel.create({ email, name, password });
 
-    return res.status(201).json({ success: "success", newUser });
+    return res.status(201).json({ msg: "success", dta: newUser });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -53,18 +53,18 @@ routes.login = async (req, res) => {
     const user = await adminModel.findOne({ email });
 
     if (!user) {
-      return res.status(404).json("email not found");
+      return res.status(404).json({ error: "email not found" });
     }
 
     if (user.password !== password) {
-      return res.status(404).json("password incorrect");
+      return res.status(404).json({ error: "password incorrect" });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
-    return res.status(201).json({ success: "success", token });
+    return res.status(201).json({ msg: "success", dta: token });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -382,8 +382,6 @@ routes.deleteVslPackage = async (req, res) => {
     return res.status(500).json({ error: "internal server error" });
   }
 };
-
-
 
 module.exports = routes;
 // export default routes;
