@@ -12,11 +12,7 @@ const routes = {};
 
 routes.createUser = async (req, res) => {
   try {
-    const { name, email, phone, password, username } = req.body;
-
-    if (!email) {
-      return res.status(404).json({ msg: "email required" });
-    }
+    const { name, email, mobile, password, username } = req.body;
 
     const { error } = emailValidation.validate(req.body);
 
@@ -75,7 +71,7 @@ routes.createUser = async (req, res) => {
     const newUser = await userModel.create({
       name,
       email,
-      mobile: phone,
+      mobile,
       password,
       username,
     });
@@ -156,15 +152,31 @@ routes.createUser = async (req, res) => {
 //   }
 // };
 
-routes.resendOtp = async (req, res) => {
-  try {
-    const _id = req.params.id;
+// routes.resendOtp = async (req, res) => {
+//   try {
+//     const _id = req.params.id;
 
-    const user = await userModel.findById(_id);
-    if (!user) return res.status(404).json({ error: "user not found" });
+//     const user = await userModel.findById(_id);
+//     if (!user) return res.status(404).json({ error: "user not found" });
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000);
-    const otpExpires = Date.now() + 10 * 60 * 1000;
+//     const verificationCode = Math.floor(100000 + Math.random() * 900000);
+//     const otpExpires = Date.now() + 10 * 60 * 1000;
+
+//     const otpresult = await sendOTP(
+//       user.email,
+//       verificationCode,
+//       "Verify your email"
+//     );
+
+//     user.verificationCode = verificationCode;
+//     user.otpExpires = otpExpires;
+//     await user.save();
+//     return res.status(200).json({ success: "otp send success" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ error: "internal server error" });
+//   }
+// };
 
     const otpresult = await sendOTP(
       user.email,
@@ -172,14 +184,5 @@ routes.resendOtp = async (req, res) => {
       "Verify your email"
     );
 
-    user.verificationCode = verificationCode;
-    user.otpExpires = otpExpires;
-    await user.save();
-    return res.status(200).json({ success: "otp send success" });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "internal server error" });
-  }
-};
 
 module.exports = routes;

@@ -92,8 +92,25 @@ routes.allContacts = async (req, res) => {
 
 routes.allPackages = async (req, res) => {
   try {
-    const packages = await packageModel.find().populate("bets");
+    const packages = await packageModel.find();
     return res.status(201).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.packageById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const package = await packageModel.findOne({ _id: id });
+
+    if (!package) {
+      return res.status(404).json({ msg: "package not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: package });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -102,8 +119,25 @@ routes.allPackages = async (req, res) => {
 
 routes.allVslPackages = async (req, res) => {
   try {
-    const packages = await vslPackageModel.find().populate("bets");
+    const packages = await vslPackageModel.find();
     return res.status(201).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.vslPackageById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const package = await vslPackageModel.findOne({ _id: id });
+
+    if (!package) {
+      return res.status(404).json({ msg: "package not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: package });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -205,9 +239,10 @@ routes.addVslPackage = async (req, res) => {
 
 routes.updatePackageStatus = async (req, res) => {
   const { id } = req.params;
-  const { status, runningStatus } = req.body;
+  let { status, runningStatus } = req.body;
 
   try {
+    console.log(id, status, runningStatus);
     const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
