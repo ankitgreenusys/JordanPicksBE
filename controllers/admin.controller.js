@@ -8,7 +8,6 @@ const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 
 const {
-  addVehicleValidation,
   createAdminValidation,
   loginValidation,
 } = require("../validations/joi");
@@ -151,7 +150,7 @@ routes.overview = async (req, res) => {
 
 routes.addPackage = async (req, res) => {
   try {
-    const { name, price, bets, date, description, gamepreview, enddate } =
+    const { name, price, bets, date, description, gamePreview, endDate } =
       req.body;
 
     const newPackage = await packageModel.create({
@@ -159,9 +158,9 @@ routes.addPackage = async (req, res) => {
       price,
       bets,
       date,
-      enddate,
+      endDate,
       description,
-      gamepreview,
+      gamePreview,
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -179,10 +178,10 @@ routes.addVslPackage = async (req, res) => {
       bets,
       date,
       description,
-      gamepreview,
-      startdate,
-      enddate,
-      saletitle,
+      gamePreview,
+      startDate,
+      endDate,
+      saleTitle,
     } = req.body;
 
     const newPackage = await vslPackageModel.create({
@@ -191,10 +190,10 @@ routes.addVslPackage = async (req, res) => {
       bets,
       date,
       description,
-      gamepreview,
-      startdate,
-      enddate,
-      saletitle,
+      gamePreview,
+      startDate,
+      endDate,
+      saleTitle,
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -270,7 +269,7 @@ routes.updateVslPackageStatus = async (req, res) => {
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
-  const { name, price, bets, date, description, gamepreview, enddate } =
+  const { name, price, bets, date, description, gamePreview, endDate } =
     req.body;
 
   try {
@@ -287,9 +286,9 @@ routes.updatePackage = async (req, res) => {
         price,
         bets,
         date,
-        enddate,
+        endDate,
         description,
-        gamepreview,
+        gamePreview,
       },
       { new: true }
     );
@@ -309,10 +308,10 @@ routes.updateVslPackage = async (req, res) => {
     bets,
     date,
     description,
-    gamepreview,
-    startdate,
-    enddate,
-    saletitle,
+    gamePreview,
+    startDate,
+    endDate,
+    saleTitle,
   } = req.body;
 
   try {
@@ -330,10 +329,10 @@ routes.updateVslPackage = async (req, res) => {
         bets,
         date,
         description,
-        gamepreview,
-        startdate,
-        enddate,
-        saletitle,
+        gamePreview,
+        startDate,
+        endDate,
+        saleTitle,
       },
       { new: true }
     );

@@ -9,11 +9,11 @@ const packageSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: {
-    type: Date,
-    required: true,
-  },
-  enddate: {
+  // date: {
+  //   type: Date,
+  //   required: true,
+  // },
+  endDate: {
     type: Date,
     required: true,
   },
@@ -21,7 +21,7 @@ const packageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  gamepreview: {
+  gamePreview: {
     type: String,
     required: true,
   },

@@ -5,27 +5,23 @@ const vslPackageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  actprice: {
+  actPrice: {
     type: Number,
     required: true,
   },
-  discountedprice: {
+  discountedPrice: {
     type: Number,
     required: true,
   },
-  date: {
+  startDate: {
     type: Date,
     required: true,
   },
-  startdate: {
+  endDate: {
     type: Date,
     required: true,
   },
-  enddate: {
-    type: Date,
-    required: true,
-  },
-  saletitle: {
+  saleTitle: {
     type: String,
     required: true,
   },
@@ -33,7 +29,7 @@ const vslPackageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  gamepreview: {
+  gamePreview: {
     type: String,
     required: true,
   },

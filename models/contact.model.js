@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const contactSchema = new mongoose.Schema({
-  fname: {
+  fName: {
     type: String,
     required: true,
   },
-  lname: {
+  lName: {
     type: String,
     required: true,
   },
