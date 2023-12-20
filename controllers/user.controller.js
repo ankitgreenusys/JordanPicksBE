@@ -30,44 +30,6 @@ routes.createUser = async (req, res) => {
       return res.status(400).json({ error: "username already exists" });
     }
 
-    // if (ifUser && !ifUser.isVerified)
-    //   await userModel.findByIdAndDelete({ _id: ifUser._id });
-
-    // const verificationCode = Math.floor(100000 + Math.random() * 900000);
-    // const otpExpires = Date.now() + 10 * 60 * 1000;
-
-    // const otpresult = await sendOTP(
-    //   email,
-    //   verificationCode,
-    //   "Verify your email"
-    // );
-
-    // if (!otpresult.messageId)
-    //   return res.status(500).json({ error: "Something went wrong with OTP" });
-
-    // if (ifUser && ifUser.isVerified) {
-    //   ifUser.verificationCode = verificationCode;
-    //   ifUser.otpExpires = otpExpires;
-    //   await ifUser.save();
-    //   return res.status(200).json({
-    //     success: "otp send success",
-    //     id: ifUser._id,
-    //     otp: verificationCode,
-    //   });
-    // }
-    // const data = {
-    //   email,
-    //   verificationCode,
-    //   otpExpires,
-    // };
-    // const newUser = await userModel.create(data);
-
-    // return res.status(201).json({
-    //   success: "otp send success",
-    //   id: ifUser._id,
-    //   otp: verificationCode,
-    // });
-
     const newUser = await userModel.create({
       name,
       email,
@@ -102,87 +64,156 @@ routes.createUser = async (req, res) => {
   }
 };
 
-// routes.verifyOTP = async (req, res) => {
-//   try {
-//     // const _id = req.params.id;
-//     const _id = req.body._id;
-//     const verificationCode = parseInt(req.body.verificationCode);
+routes.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-//     if (!verificationCode)
-//       return res.status(404).json({ error: "otp required" });
+    const { error } = emailValidation.validate(req.body);
 
-//     const user = await userModel.findById(_id);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
-//     if (!user) return res.status(404).json({ error: "user not found" });
+    const user = await userModel.findOne({ email });
 
-//     if (
-//       user.verificationCode !== verificationCode ||
-//       Date.now() > user.otpExpires
-//     ) {
-//       return res.status(400).json({ error: "otp InValid" });
-//     }
+    if (!user) {
+      return res.status(404).json({ error: "email not found" });
+    }
 
-//     if (user.name) {
-//       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-//         expiresIn: "1d",
-//       });
-//       const refreshToken = jwt.sign(
-//         { id: user._id },
-//         process.env.REFRESH_TOKEN_PRIVATE_KEY,
-//         {
-//           expiresIn: "1y",
-//         }
-//       );
-//       const newuser = user.toObject();
-//       newuser.token = token;
-//       newuser.refreshToken = refreshToken;
-//       return res.status(200).json({ newuser });
-//     }
+    if (user.password !== password) {
+      return res.status(404).json({ error: "password incorrect" });
+    }
 
-//     user.isVerified = true;
-//     const result = await user.save();
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
-//     const newUser = result.toObject();
-//     newUser.token = null;
-
-//     return res.status(200).json({ newUser, success: "Verified" });
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(500).json({ error: "internal server error" });
-//   }
-// };
-
-// routes.resendOtp = async (req, res) => {
-//   try {
-//     const _id = req.params.id;
-
-//     const user = await userModel.findById(_id);
-//     if (!user) return res.status(404).json({ error: "user not found" });
-
-//     const verificationCode = Math.floor(100000 + Math.random() * 900000);
-//     const otpExpires = Date.now() + 10 * 60 * 1000;
-
-//     const otpresult = await sendOTP(
-//       user.email,
-//       verificationCode,
-//       "Verify your email"
-//     );
-
-//     user.verificationCode = verificationCode;
-//     user.otpExpires = otpExpires;
-//     await user.save();
-//     return res.status(200).json({ success: "otp send success" });
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(500).json({ error: "internal server error" });
-//   }
-// };
-
-    const otpresult = await sendOTP(
-      user.email,
-      verificationCode,
-      "Verify your email"
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.REFRESH_TOKEN_PRIVATE_KEY,
+      {
+        expiresIn: "1y",
+      }
     );
 
+    const newuser = user.toObject();
+
+    newuser.token = token;
+    newuser.refreshToken = refreshToken;
+
+    return res.status(201).json({ msg: "success", dta: newuser });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.refreshAccessToken = async (req, res) => {
+  const refreshToken = req.body.refreshToken;
+
+  if (!refreshToken)
+    return res.status(401).send({ error: "Access denied, token missing!" });
+
+  console.log("refressh", refreshToken);
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_PRIVATE_KEY
+    );
+
+    const id = decoded.id;
+    const accessToken = jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    return res.status(201).send({
+      msg: "success",
+      dta: accessToken,
+    });
+
+    // return res.send(success(201, { accessToken }));
+  } catch (e) {
+    console.log(e);
+    return res.status(401).send({ error: "Invalid refresh token" });
+    // return res.send(error(401, "Invalid refresh token"));
+  }
+};
+
+routes.allActivePackages = async (req, res) => {
+  try {
+    const packages = await packageModel.find({ status: "active" });
+    return res.status(201).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.contactUs = async (req, res) => {
+  try {
+    const { fName, lName, email, mobile, message } = req.body;
+
+    const newContact = await contactModel.create({
+      fName,
+      lName,
+      email,
+      mobile,
+      message,
+    });
+
+    return res.status(201).json({ msg: "success", dta: newContact });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.useDashboard = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await userModel
+      .findById(id)
+      .populate("package")
+      .populate("vslPackage")
+      .populate("orderHistory");
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    // Total Wins and Losses
+
+    const totalWins = user.package.filter((item) => item.result === "win");
+    const totalLosses = user.package.filter((item) => item.result === "lose");
+    const totalTies = user.package.filter((item) => item.result === "tie");
+
+    return res.status(201).json({
+      msg: "success",
+      dta: {
+        user,
+        orderHistory,
+        totalWins: totalWins.length,
+        totalLosses: totalLosses.length,
+        totalTies: totalTies.length,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.getpackage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const package = await packageModel.findById(id);
+    return res.status(201).json({ msg: "success", dta: package });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
 
 module.exports = routes;
