@@ -184,14 +184,13 @@ routes.overview = async (req, res) => {
 
 routes.addPackage = async (req, res) => {
   try {
-    const { name, price, bets, date, description, gamePreview, endDate } =
+    const { name, price, bets, description, gamePreview, endDate } =
       req.body;
 
     const newPackage = await packageModel.create({
       name,
       price,
       bets,
-      date,
       endDate,
       description,
       gamePreview,
@@ -210,7 +209,6 @@ routes.addVslPackage = async (req, res) => {
       name,
       price,
       bets,
-      date,
       description,
       gamePreview,
       startDate,
@@ -222,7 +220,6 @@ routes.addVslPackage = async (req, res) => {
       name,
       price,
       bets,
-      date,
       description,
       gamePreview,
       startDate,
@@ -304,7 +301,7 @@ routes.updateVslPackageStatus = async (req, res) => {
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
-  const { name, price, bets, date, description, gamePreview, endDate } =
+  const { name, price, bets, description, gamePreview, endDate } =
     req.body;
 
   try {
@@ -320,7 +317,6 @@ routes.updatePackage = async (req, res) => {
         name,
         price,
         bets,
-        date,
         endDate,
         description,
         gamePreview,
@@ -341,7 +337,6 @@ routes.updateVslPackage = async (req, res) => {
     name,
     price,
     bets,
-    date,
     description,
     gamePreview,
     startDate,
@@ -362,7 +357,6 @@ routes.updateVslPackage = async (req, res) => {
         name,
         price,
         bets,
-        date,
         description,
         gamePreview,
         startDate,
