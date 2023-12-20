@@ -7,21 +7,27 @@ const packageSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
+    required: true,
   },
   date: {
     type: Date,
+    required: true,
   },
   enddate: {
     type: Date,
+    required: true,
   },
   description: {
     type: String,
+    required: true,
   },
   gamepreview: {
     type: String,
+    required: true,
   },
   bets: {
     type: Array,
+    required: true,
   },
   status: {
     type: String,

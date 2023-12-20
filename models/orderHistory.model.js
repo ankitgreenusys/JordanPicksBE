@@ -4,6 +4,7 @@ const orderHistorySchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
+    required: true,
   },
   package: {
     type: mongoose.Schema.Types.ObjectId,
@@ -15,6 +16,7 @@ const orderHistorySchema = new mongoose.Schema({
   },
   date: {
     type: Date,
+    required: true,
   },
   status: {
     type: String,

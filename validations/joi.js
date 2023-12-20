@@ -4,16 +4,20 @@ const addVehicleValidation = Joi.object({
   vehicleNumber: Joi.string().required(),
   chassisNumber: Joi.string().required(),
   engineNumber: Joi.string().required(),
-  hypotheticationRC: Joi.boolean().required(), 
-  BankNOCImage: Joi.string(), 
-  insuranceValid: Joi.boolean().required(), 
-  insuranceImage: Joi.string(), 
+  hypotheticationRC: Joi.boolean().required(),
+  BankNOCImage: Joi.string(),
+  insuranceValid: Joi.boolean().required(),
+  insuranceImage: Joi.string(),
   otherDocument: Joi.boolean().required(),
-  otherDocumentImage: Joi.string()
+  otherDocumentImage: Joi.string(),
 });
 
 const emailValidation = Joi.object({
   email: Joi.string().email().required(),
+  name: Joi.string().required(),
+  mobile: Joi.number().required(),
+  username: Joi.string().required(),
+  password: Joi.string().required(),
 });
 
 const registerValidation = Joi.object({
