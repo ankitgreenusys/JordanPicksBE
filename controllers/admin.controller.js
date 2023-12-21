@@ -78,7 +78,7 @@ routes.allUsers = async (req, res) => {
   try {
     const users = await userModel.find();
 
-    const total = users.length;
+    const totalPage = users.length;
     const limit = 10;
 
     const startIndex = (page - 1) * limit;
@@ -88,11 +88,8 @@ routes.allUsers = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      dta: {
-        total,
-        limit,
-        result,
-      },
+      totalPage,
+      dta: result,
     });
   } catch (error) {
     console.log(error);
@@ -106,7 +103,7 @@ routes.allContacts = async (req, res) => {
   try {
     const contacts = await contactModel.find();
 
-    const total = contacts.length;
+    const totalPage = contacts.length;
     const limit = 10;
 
     const startIndex = (page - 1) * limit;
@@ -116,11 +113,8 @@ routes.allContacts = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      dta: {
-        total,
-        limit,
-        result,
-      },
+      totalPage,
+      dta: result,
     });
   } catch (error) {
     console.log(error);
@@ -134,7 +128,7 @@ routes.allPackages = async (req, res) => {
   try {
     const packages = await packageModel.find().populate("bets");
 
-    const total = packages.length;
+    const totalPage = packages.length;
     const limit = 10;
 
     const startIndex = (page - 1) * limit;
@@ -144,11 +138,8 @@ routes.allPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      dta: {
-        total,
-        limit,
-        result,
-      },
+      totalPage,
+      dta: result,
     });
   } catch (error) {
     console.log(error);
@@ -179,7 +170,7 @@ routes.allVslPackages = async (req, res) => {
   try {
     const packages = await vslPackageModel.find().populate("bets");
 
-    const total = packages.length;
+    const totalPage = packages.length;
     const limit = 10;
 
     const startIndex = (page - 1) * limit;
@@ -189,11 +180,8 @@ routes.allVslPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      dta: {
-        total,
-        limit,
-        result,
-      },
+      totalPage,
+      dta: result,
     });
   } catch (error) {
     console.log(error);
