@@ -25,10 +25,12 @@ const packageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  bets: {
-    type: Array,
-    required: true,
-  },
+  bets:  [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "bet",
+      },
+    ],
   status: {
     type: String,
     enum: ["active", "inactive"],

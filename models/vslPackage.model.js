@@ -34,7 +34,12 @@ const vslPackageSchema = new mongoose.Schema({
     required: true,
   },
   bets: {
-    type: Array,
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "bet",
+      },
+    ],
     required: true,
   },
   status: {

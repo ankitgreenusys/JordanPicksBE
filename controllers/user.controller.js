@@ -6,7 +6,6 @@ const vslPackageModel = require("../models/vslPackage.model");
 const sendOTP = require("../utils/sendOtp.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
-const fs = require("fs");
 
 const routes = {};
 
@@ -68,11 +67,11 @@ routes.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { error } = emailValidation.validate(req.body);
+    // const { error } = emailValidation.validate(req.body);
 
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
+    // if (error) {
+    //   return res.status(400).json({ error: error.details[0].message });
+    // }
 
     const user = await userModel.findOne({ email });
 

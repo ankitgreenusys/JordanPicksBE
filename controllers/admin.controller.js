@@ -4,8 +4,9 @@ const adminModel = require("../models/admin.model");
 const contactModel = require("../models/contact.model");
 const orderHistoryModel = require("../models/orderHistory.model");
 const packageModel = require("../models/package.model");
-const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
+const betModel = require("../models/bet.model");
+const userModel = require("../models/user.model");
 
 const {
   createAdminValidation,
@@ -92,7 +93,7 @@ routes.allContacts = async (req, res) => {
 
 routes.allPackages = async (req, res) => {
   try {
-    const packages = await packageModel.find();
+    const packages = await packageModel.find().populate("bets");
     return res.status(201).json({ msg: "success", dta: packages });
   } catch (error) {
     console.log(error);
@@ -104,7 +105,7 @@ routes.packageById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const package = await packageModel.findOne({ _id: id });
+    const package = await packageModel.findOne({ _id: id }).populate("bets");
 
     if (!package) {
       return res.status(404).json({ msg: "package not found" });
@@ -119,7 +120,7 @@ routes.packageById = async (req, res) => {
 
 routes.allVslPackages = async (req, res) => {
   try {
-    const packages = await vslPackageModel.find();
+    const packages = await vslPackageModel.find().populate("bets");
     return res.status(201).json({ msg: "success", dta: packages });
   } catch (error) {
     console.log(error);
@@ -131,7 +132,7 @@ routes.vslPackageById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const package = await vslPackageModel.findOne({ _id: id });
+    const package = await vslPackageModel.findOne({ _id: id }).populate("bets");
 
     if (!package) {
       return res.status(404).json({ msg: "package not found" });
@@ -189,10 +190,20 @@ routes.addPackage = async (req, res) => {
     const newPackage = await packageModel.create({
       name,
       price,
-      bets,
       endDate,
       description,
       gamePreview,
+    });
+
+    bets.forEach(async (bet) => {
+      const newBet = await betModel.create({
+        title: bet,
+      });
+      await packageModel.findOneAndUpdate(
+        { _id: newPackage._id },
+        { $push: { bets: newBet._id } },
+        { new: true }
+      );
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -220,12 +231,23 @@ routes.addVslPackage = async (req, res) => {
       name,
       actPrice,
       discountedPrice,
-      bets,
       description,
       gamePreview,
       startDate,
       endDate,
       saleTitle,
+    });
+
+    bets.forEach(async (bet) => {
+      const newBet = await betModel.create({
+        ...bet,
+      });
+
+      await vslPackageModel.findOneAndUpdate(
+        { _id: newPackage._id },
+        { $push: { bets: newBet._id } },
+        { new: true }
+      );
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -316,14 +338,20 @@ routes.updatePackage = async (req, res) => {
       {
         name,
         price,
-        bets,
         endDate,
         description,
         gamePreview,
+        bets
       },
       { new: true }
     );
 
+      // package.bets = [];
+      // const oldBets = bets.filter((item) => item._id);
+      // const newBets = bets.filter((item) => !item._id);
+      // package.bets = oldBets;
+      // await package.save();
+    
     return res.status(201).json({ msg: "success", dta: updatedPackage });
   } catch (error) {
     console.log(error);
@@ -336,7 +364,7 @@ routes.updateVslPackage = async (req, res) => {
   const {
     name,
     actPrice,
-      discountedPrice,
+    discountedPrice,
     bets,
     description,
     gamePreview,
@@ -357,7 +385,7 @@ routes.updateVslPackage = async (req, res) => {
       {
         name,
         actPrice,
-      discountedPrice,
+        discountedPrice,
         bets,
         description,
         gamePreview,
