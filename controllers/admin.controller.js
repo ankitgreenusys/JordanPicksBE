@@ -301,7 +301,7 @@ routes.addVslPackage = async (req, res) => {
 
     bets.forEach(async (bet) => {
       const newBet = await betModel.create({
-        ...bet,
+        title: bet,
       });
 
       await vslPackageModel.findOneAndUpdate(
@@ -355,6 +355,8 @@ routes.updatePackageBetStatus = async (req, res) => {
   const { id } = req.params;
   const { betId, status } = req.body;
 
+  console.log(id, betId, status)
+
   try {
     const package = await packageModel.findOne({ _id: id });
 
@@ -364,7 +366,7 @@ routes.updatePackageBetStatus = async (req, res) => {
 
     // id exists in package.bets
 
-    const exits = package.bets.some((item) => item._id === betId);
+    const exits = package.bets.some((item) => item._id == betId);
 
     if (!exits) {
       return res.status(404).json({ msg: "bet not found" });
@@ -372,7 +374,7 @@ routes.updatePackageBetStatus = async (req, res) => {
 
     const updatedBet = await betModel.findOneAndUpdate(
       { _id: betId },
-      { status },
+      {result: status },
       { new: true }
     );
 
@@ -419,6 +421,8 @@ routes.updateVslPackageBetStatus = async (req, res) => {
   const { id } = req.params;
   const { betId, status } = req.body;
 
+  console.log(id, betId, status);
+
   try {
     const package = await vslPackageModel.findOne({ _id: id });
 
@@ -428,7 +432,7 @@ routes.updateVslPackageBetStatus = async (req, res) => {
 
     // id exists in package.bets
 
-    const exits = package.bets.some((item) => item._id === betId);
+    const exits = package.bets.some((item) => item._id == betId);
 
     if (!exits) {
       return res.status(404).json({ msg: "bet not found" });
@@ -436,7 +440,7 @@ routes.updateVslPackageBetStatus = async (req, res) => {
 
     const updatedBet = await betModel.findOneAndUpdate(
       { _id: betId },
-      { status },
+      {result: status },
       { new: true }
     );
 

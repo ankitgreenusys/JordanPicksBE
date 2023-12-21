@@ -176,7 +176,9 @@ routes.contactUs = async (req, res) => {
 
 routes.userDashboard = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id  = req.userId;
+
+    console.log(id);
 
     const user = await userModel
       .findById(id)
@@ -198,7 +200,6 @@ routes.userDashboard = async (req, res) => {
       msg: "success",
       dta: {
         user,
-        orderHistory,
         totalWins: totalWins.length,
         totalLosses: totalLosses.length,
         totalTies: totalTies.length,
@@ -212,7 +213,7 @@ routes.userDashboard = async (req, res) => {
 
 routes.getPackage = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.userId;
     const package = await packageModel.findById(id);
     return res.status(201).json({ msg: "success", dta: package });
   } catch (error) {

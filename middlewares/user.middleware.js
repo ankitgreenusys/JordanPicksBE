@@ -19,6 +19,7 @@ const auth = async (req, res, next) => {
       if (!user) return res.status(404).json({ error: "User not found" });
 
       req.userId = id;
+      console.log(req.userId,id);
       next();
     } else {
       return res.status(401).send({ error: "Found Unauthorized" });
