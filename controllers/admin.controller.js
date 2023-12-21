@@ -88,7 +88,7 @@ routes.allUsers = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPage,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -113,7 +113,7 @@ routes.allContacts = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPage,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -180,7 +180,7 @@ routes.allVslPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPage,
+      totalPages,
       dta: result,
     });
   } catch (error) {
