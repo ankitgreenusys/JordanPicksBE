@@ -169,7 +169,7 @@ routes.contactUs = async (req, res) => {
   }
 };
 
-routes.useDashboard = async (req, res) => {
+routes.userDashboard = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -205,7 +205,7 @@ routes.useDashboard = async (req, res) => {
   }
 };
 
-routes.getpackage = async (req, res) => {
+routes.getPackage = async (req, res) => {
   try {
     const { id } = req.params;
     const package = await packageModel.findById(id);

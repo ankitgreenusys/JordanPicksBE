@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-// const userRouter = require("./routes/user.route");
+const userRouter = require("./routes/user.route");
 const adminRouter = require("./routes/admin.route");
 const path = require("path");
 const morgan = require("morgan");
@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.static("public/images"));
 
 app.use("/admin", adminRouter);
-// app.use("/user", userRouter);
+app.use("/user", userRouter);
 app.use("/", (req, res) => {
   return res.send("working");
 });
