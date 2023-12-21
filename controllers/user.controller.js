@@ -167,7 +167,7 @@ routes.contactUs = async (req, res) => {
       message,
     });
 
-    return res.status(201).json({ msg: "success", dta: newContact });
+    return res.status(200).json({ msg: "success", dta: newContact });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -176,7 +176,7 @@ routes.contactUs = async (req, res) => {
 
 routes.userDashboard = async (req, res) => {
   try {
-    const id  = req.userId;
+    const id = req.userId;
 
     console.log(id);
 
@@ -196,7 +196,7 @@ routes.userDashboard = async (req, res) => {
     const totalLosses = user.package.filter((item) => item.result === "lose");
     const totalTies = user.package.filter((item) => item.result === "tie");
 
-    return res.status(201).json({
+    return res.status(200).json({
       msg: "success",
       dta: {
         user,
@@ -215,11 +215,24 @@ routes.getPackage = async (req, res) => {
   try {
     const id = req.userId;
     const package = await packageModel.findById(id);
-    return res.status(201).json({ msg: "success", dta: package });
+    return res.status(200).json({ msg: "success", dta: package });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
   }
+};
+
+routes.buyPackage = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: 2000,
+    currency: "usd",
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+  console.log(paymentIntent);
+  return res.status(201).json({ msg: "success", dta: paymentIntent });
 };
 
 module.exports = routes;

@@ -13,6 +13,7 @@ router.get("/allPackage", userController.allActivePackages);
 router.get("/getPackage", auth, userController.getPackage);
 router.post("/contact", auth, userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
+router.post("/createIntent", auth, userController.buyPackage);
 
 
 module.exports = router;
