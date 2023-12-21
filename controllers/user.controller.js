@@ -3,6 +3,7 @@ const orderHistoryModel = require("../models/orderHistory.model");
 const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
+const bcrypt = require("bcryptjs");
 const sendOTP = require("../utils/sendOtp.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
@@ -29,11 +30,14 @@ routes.createUser = async (req, res) => {
       return res.status(400).json({ error: "username already exists" });
     }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const newUser = await userModel.create({
       name,
       email,
       mobile,
-      password,
+      password: hashedPassword,
       username,
     });
 
@@ -79,8 +83,10 @@ routes.login = async (req, res) => {
       return res.status(404).json({ error: "email not found" });
     }
 
-    if (user.password !== password) {
-      return res.status(404).json({ error: "password incorrect" });
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res.status(400).json({ error: "invalid password" });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
