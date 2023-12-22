@@ -255,6 +255,8 @@ routes.getPackage = async (req, res) => {
     if (isBuied)
       isBought = true;
 
+    console.log(isBuied);
+
     return res.status(200).json({ msg: "success", dta: package, isBought });
   } catch (error) {
     console.log(error);
