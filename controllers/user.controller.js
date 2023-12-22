@@ -217,7 +217,7 @@ routes.updateProfile = async (req, res) => {
 
   const { name, mobile, currentPassword, newPassword } = req.body;
 
-  const user = userModel.findById(id);
+  const user = await userModel.findById(id);
 
   if (!user) {
     return res.status(404).json({ error: "user not found" });
@@ -229,7 +229,7 @@ routes.updateProfile = async (req, res) => {
     const validPassword = await bcrypt.compare(currentPassword, user.password);
 
     if (!validPassword) {
-      return res.status(400).json({ error: "invalid password" });
+      return res.status(400).json({ error: "inval id password" });
     }
 
     const salt = await bcrypt.genSalt(10);
