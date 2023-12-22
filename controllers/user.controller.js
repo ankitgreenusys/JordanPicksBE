@@ -250,9 +250,9 @@ routes.getPackage = async (req, res) => {
     const package = await packageModel.findById(id);
     const user = await userModel.findById(id).populate("package")
 
-    const isBuied = user.package.find((item) => item._id === id);
+    // const isBuied = user.package.find((item) => item._id === id);
     
-    return res.status(200).json({ msg: "success", dta: package, isBuied });
+    return res.status(200).json({ msg: "success", dta: package });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
