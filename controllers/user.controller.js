@@ -211,9 +211,40 @@ routes.userDashboard = async (req, res) => {
   }
 };
 
+routes.updateProfile = async (req, res) => {
+  const id = req.userId;
+
+  const { name, mobile, currentPassword, newPassword } = req.body;
+
+  const user = userModel.findById(id);
+
+  if (!user) {
+    return res.status(404).json({ error: "user not found" });
+  }
+  user.name = name;
+  user.mobile = mobile;
+
+  if (currentPassword || newPassword) {
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+
+    if (!validPassword) {
+      return res.status(400).json({ error: "invalid password" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+  }
+
+  await user.save();
+
+  return res.status(200).json({ msg: "success", dta: user });
+};
+
 routes.getPackage = async (req, res) => {
   try {
-    const id = req.userId;
+    const id = req.params.id;
     const package = await packageModel.findById(id);
     return res.status(200).json({ msg: "success", dta: package });
   } catch (error) {
@@ -222,8 +253,10 @@ routes.getPackage = async (req, res) => {
   }
 };
 
+const stripe = require("stripe")(
+  "sk_test_51O7tf8SFrCuULYACU8Sm2XF25Qh9lTjCfxJOWtTo0ktgyay8jjxbT0X8J4BQXfhPELO1R0KsSc3xekFe7AyF7u6y00pCTYCZzb"
+);
 routes.buyPackage = async (req, res) => {
-  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   const paymentIntent = await stripe.paymentIntents.create({
     amount: 2000,
     currency: "usd",
@@ -231,8 +264,9 @@ routes.buyPackage = async (req, res) => {
       enabled: true,
     },
   });
-  console.log(paymentIntent);
-  return res.status(201).json({ msg: "success", dta: paymentIntent });
+  return res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
 };
 
 module.exports = routes;

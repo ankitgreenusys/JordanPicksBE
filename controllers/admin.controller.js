@@ -88,7 +88,7 @@ routes.allUsers = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages,
+      totalPages: totalPages / limit,
       dta: result,
     });
   } catch (error) {
@@ -113,7 +113,7 @@ routes.allContacts = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages,
+      totalPages: totalPages / limit,
       dta: result,
     });
   } catch (error) {
@@ -126,7 +126,7 @@ routes.allPackages = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const packages = await packageModel.find().populate("bets");
+    const packages = await packageModel.find({ result: "pending" });
 
     const totalPages = packages.length;
     const limit = 10;
@@ -138,7 +138,7 @@ routes.allPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages,
+      totalPages: totalPages / limit,
       dta: result,
     });
   } catch (error) {
@@ -147,11 +147,44 @@ routes.allPackages = async (req, res) => {
   }
 };
 
+routes.pastPackages = async (req, res) => {
+  const { page } = req.query;
+
+  try {
+    const packages = await packageModel.find({ result: { $ne: "pending" } });
+
+    const totalPages = packages.length;
+    const limit = 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = packages.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages: totalPages / limit,
+      dta: result,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+
+  // try {
+  //   const packages = await packageModel.find({ result: { $ne: "pending" } });
+  //   return res.status(201).json({ msg: "success", dta: packages });
+  // } catch (error) {
+  //   console.log(error);
+  //   return res.status(500).json({ error: "internal server error" });
+  // }
+}
+
 routes.packageById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const package = await packageModel.findOne({ _id: id }).populate("bets");
+    const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
       return res.status(404).json({ msg: "package not found" });
@@ -168,7 +201,7 @@ routes.allVslPackages = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const packages = await vslPackageModel.find().populate("bets");
+    const packages = await vslPackageModel.find();
 
     const totalPages = packages.length;
     const limit = 10;
@@ -180,7 +213,7 @@ routes.allVslPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages,
+      totalPages: totalPages / limit,
       dta: result,
     });
   } catch (error) {
@@ -193,7 +226,7 @@ routes.vslPackageById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const package = await vslPackageModel.findOne({ _id: id }).populate("bets");
+    const package = await vslPackageModel.findOne({ _id: id });
 
     if (!package) {
       return res.status(404).json({ msg: "package not found" });
@@ -254,18 +287,19 @@ routes.addPackage = async (req, res) => {
       endDate,
       description,
       gamePreview,
+      bets,
     });
 
-    bets.forEach(async (bet) => {
-      const newBet = await betModel.create({
-        title: bet,
-      });
-      await packageModel.findOneAndUpdate(
-        { _id: newPackage._id },
-        { $push: { bets: newBet._id } },
-        { new: true }
-      );
-    });
+    // bets.forEach(async (bet) => {
+    //   const newBet = await betModel.create({
+    //     title: bet,
+    //   });
+    //   await packageModel.findOneAndUpdate(
+    //     { _id: newPackage._id },
+    //     { $push: { bets: newBet._id } },
+    //     { new: true }
+    //   );
+    // });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
   } catch (error) {
@@ -297,19 +331,20 @@ routes.addVslPackage = async (req, res) => {
       startDate,
       endDate,
       saleTitle,
+      bets,
     });
 
-    bets.forEach(async (bet) => {
-      const newBet = await betModel.create({
-        title: bet,
-      });
+    // bets.forEach(async (bet) => {
+    //   const newBet = await betModel.create({
+    //     title: bet,
+    //   });
 
-      await vslPackageModel.findOneAndUpdate(
-        { _id: newPackage._id },
-        { $push: { bets: newBet._id } },
-        { new: true }
-      );
-    });
+    //   await vslPackageModel.findOneAndUpdate(
+    //     { _id: newPackage._id },
+    //     { $push: { bets: newBet._id } },
+    //     { new: true }
+    //   );
+    // });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
   } catch (error) {
@@ -351,39 +386,39 @@ routes.updatePackageStatus = async (req, res) => {
   }
 };
 
-routes.updatePackageBetStatus = async (req, res) => {
-  const { id } = req.params;
-  const { betId, status } = req.body;
+// routes.updatePackageBetStatus = async (req, res) => {
+//   const { id } = req.params;
+//   const { betId, status } = req.body;
 
-  console.log(id, betId, status)
+//   console.log(id, betId, status);
 
-  try {
-    const package = await packageModel.findOne({ _id: id });
+//   try {
+//     const package = await packageModel.findById(id);
 
-    if (!package) {
-      return res.status(404).json({ msg: "package not found" });
-    }
+//     if (!package) {
+//       return res.status(404).json({ msg: "package not found" });
+//     }
 
-    // id exists in package.bets
+//     // id exists in package.bets
 
-    const exits = package.bets.some((item) => item._id == betId);
+//     const exits = package.bets.some((item) => item._id == betId);
 
-    if (!exits) {
-      return res.status(404).json({ msg: "bet not found" });
-    }
+//     if (!exits) {
+//       return res.status(404).json({ msg: "bet not found" });
+//     }
 
-    const updatedBet = await betModel.findOneAndUpdate(
-      { _id: betId },
-      {result: status },
-      { new: true }
-    );
+//     const updatedBet = await betModel.findOneAndUpdate(
+//       { _id: betId },
+//       { result: status },
+//       { new: true }
+//     );
 
-    return res.status(201).json({ msg: "success" });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "internal server error" });
-  }
-};
+//     return res.status(201).json({ msg: "success" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ error: "internal server error" });
+//   }
+// };
 
 routes.updateVslPackageStatus = async (req, res) => {
   const { id } = req.params;
@@ -417,50 +452,47 @@ routes.updateVslPackageStatus = async (req, res) => {
   }
 };
 
-routes.updateVslPackageBetStatus = async (req, res) => {
-  const { id } = req.params;
-  const { betId, status } = req.body;
+// routes.updateVslPackageBetStatus = async (req, res) => {
+//   const { id } = req.params;
+//   const { betId, status } = req.body;
 
-  console.log(id, betId, status);
+//   console.log(id, betId, status);
 
-  try {
-    const package = await vslPackageModel.findOne({ _id: id });
+//   try {
+//     const package = await vslPackageModel.findOne({ _id: id });
 
-    if (!package) {
-      return res.status(404).json({ msg: "package not found" });
-    }
+//     if (!package) {
+//       return res.status(404).json({ msg: "package not found" });
+//     }
 
-    // id exists in package.bets
+//     // id exists in package.bets
 
-    const exits = package.bets.some((item) => item._id == betId);
+//     const exits = package.bets.some((item) => item._id == betId);
 
-    if (!exits) {
-      return res.status(404).json({ msg: "bet not found" });
-    }
+//     if (!exits) {
+//       return res.status(404).json({ msg: "bet not found" });
+//     }
 
-    const updatedBet = await betModel.findOneAndUpdate(
-      { _id: betId },
-      {result: status },
-      { new: true }
-    );
+//     const updatedBet = await betModel.findOneAndUpdate(
+//       { _id: betId },
+//       { result: status },
+//       { new: true }
+//     );
 
-    return res.status(201).json({ msg: "success" });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "internal server error" });
-  }
-};
+//     return res.status(201).json({ msg: "success" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ error: "internal server error" });
+//   }
+// };
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
   const { name, price, bets, description, gamePreview, endDate } = req.body;
-  const newBets = JSON.parse(bets);
-
-  console.log(newBets);
+  // const newBets = JSON.parse(bets);/
 
   try {
-    const package = await packageModel.findOne({ _id: id });
-
+    const package = await packageModel.findById(id);
     if (!package) {
       return res.status(404).json({ msg: "package not found" });
     }
@@ -473,60 +505,38 @@ routes.updatePackage = async (req, res) => {
         endDate,
         description,
         gamePreview,
+        bets,
       },
       { new: true }
     );
 
-    const oldBets = updatedPackage.bets;
-    const newBets = bets.filter((item) => !oldBets.includes(item?._id));
-    const updateBets = bets.filter((item) => oldBets.includes(item?._id));
-    // const deletedBets = oldBets.filter((item) => !bets.includes(item));
-    const deletedBets = oldBets.filter(
-      (item) => !bets.some((bet) => bet._id === item)
-    );
-    const updatedBets = [];
-    console.log(oldBets, newBets, updateBets, deletedBets);
+    // console.log(newBets,"newBets");
 
-    updatedPackage.bets = [];
-    await updatedPackage.save();
-
-    // deletedBets.forEach(async (bet) => {
-    //   await betModel.findOneAndDelete({ _id: bet });
+    // bets.forEach(async (bet) => {
+    //   if (bet.action === "add") {
+    //     const newBet = await betModel.create({
+    //       title: bet.title,
+    //     });
+    //     await packageModel.findOneAndUpdate(
+    //       { _id: updatedPackage._id },
+    //       { $push: { bets: newBet._id } },
+    //       { new: true }
+    //     );
+    //   } else if (bet.action === "update") {
+    //     await betModel.findOneAndUpdate(
+    //       { _id: bet._id },
+    //       { title: bet.title },
+    //       { new: true }
+    //     );
+    //   } else if (bet.action === "delete") {
+    //     await betModel.findOneAndDelete({ _id: bet._id });
+    //     await packageModel.findOneAndUpdate(
+    //       { _id: updatedPackage._id },
+    //       { $pull: { bets: bet._id } },
+    //       { new: true }
+    //     );
+    //   }
     // });
-
-    newBets.forEach(async (bet) => {
-      const newBet = await betModel.create({
-        title: bet.title,
-      });
-
-      console.log(newBet._id);
-
-      // updatedPackage.bets.push(newBet._id);
-      updatedBets.push(newBet._id);
-    });
-    packageModel.findOneAndUpdate(
-      { _id: id },
-      { $push: { bets: updatedBets } },
-      { new: true }
-    );
-
-    // updateBets.forEach(async (bet) => {
-    //   const updatedBet = await betModel.findOneAndUpdate(
-    //     { _id: bet },
-    //     { title: bet.title, result: bet.result },
-    //     { new: true }
-    //   );
-
-    //   updatedBets.push(updatedBet._id);
-    // });
-
-    // console.log(updatedBets);
-
-    // await packageModel.findOneAndUpdate(
-    //   { _id: id },
-    //   { bets: updatedBets },
-    //   { new: true }
-    // );
 
     return res.status(201).json({ msg: "success", dta: updatedPackage });
   } catch (error) {

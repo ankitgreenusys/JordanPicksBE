@@ -10,10 +10,10 @@ router.post("/signin", userController.createUser);
 router.post("/refreshtoken", userController.refreshAccessToken);
 router.post("/login", userController.login);
 router.get("/allPackage", userController.allActivePackages);
-router.get("/getPackage", auth, userController.getPackage);
+router.get("/getPackage/:id", auth, userController.getPackage);
 router.post("/contact", auth, userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
+router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntent", auth, userController.buyPackage);
-
 
 module.exports = router;
