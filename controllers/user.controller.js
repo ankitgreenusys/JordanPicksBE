@@ -248,9 +248,9 @@ routes.getPackage = async (req, res) => {
     const uid = req.userId;
     const id = req.params.id;
     const package = await packageModel.findById(id);
-    const user = await userModel.findById(id).populate("package")
+    const user = await userModel.findById(uid).populate("package")
 
-    // const isBuied = user.package.find((item) => item._id === id);
+    const isBuied = user.package.find((item) => item._id === id);
 
     return res.status(200).json({ msg: "success", dta: package, user });
   } catch (error) {
