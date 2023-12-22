@@ -77,8 +77,8 @@ routes.allUsers = async (req, res) => {
   try {
     const users = await userModel.find();
 
-    const totalPages = users.length;
     const limit = 10;
+    const totalPages = Math.ceil(users.length / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -87,7 +87,7 @@ routes.allUsers = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages: totalPages / limit,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -102,8 +102,8 @@ routes.allContacts = async (req, res) => {
   try {
     const contacts = await contactModel.find();
 
-    const totalPages = contacts.length;
     const limit = 10;
+    const totalPages = Math.ceil(contacts.length / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -112,7 +112,7 @@ routes.allContacts = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages: totalPages / limit,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -127,8 +127,8 @@ routes.allPackages = async (req, res) => {
   try {
     const packages = await packageModel.find({ result: "pending" });
 
-    const totalPages = packages.length;
     const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -137,7 +137,7 @@ routes.allPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages: totalPages / limit,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -152,8 +152,8 @@ routes.pastPackages = async (req, res) => {
   try {
     const packages = await packageModel.find({ result: { $ne: "pending" } });
 
-    const totalPages = packages.length;
     const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -162,7 +162,7 @@ routes.pastPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages: totalPages / limit,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -202,8 +202,8 @@ routes.allVslPackages = async (req, res) => {
   try {
     const packages = await vslPackageModel.find();
 
-    const totalPages = packages.length;
     const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -212,7 +212,7 @@ routes.allVslPackages = async (req, res) => {
 
     return res.status(201).json({
       msg: "success",
-      totalPages: totalPages / limit,
+      totalPages,
       dta: result,
     });
   } catch (error) {
@@ -239,13 +239,27 @@ routes.vslPackageById = async (req, res) => {
 };
 
 routes.allOrders = async (req, res) => {
+  const { page } = req.query;
   try {
     const orders = await orderHistoryModel
       .find()
       .populate("user")
       .populate("package")
       .populate("vslPackage");
-    return res.status(201).json({ msg: "success", dta: orders });
+
+    const limit = 10;
+    const totalPages = Math.ceil(orders.length / limit);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = orders.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
