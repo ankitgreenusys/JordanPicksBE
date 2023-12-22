@@ -19,6 +19,9 @@ const orderHistorySchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "inactive",
   },
+  desc : {
+    type: String,
+  }
   createdAt: {
     type: Date,
     default: Date.now(),
