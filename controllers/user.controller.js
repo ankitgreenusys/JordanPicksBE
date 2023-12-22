@@ -225,11 +225,11 @@ routes.updateProfile = async (req, res) => {
   user.name = name;
   user.mobile = mobile;
 
-  if (currentPassword || newPassword) {
+  if (currentPassword && newPassword) {
     const validPassword = await bcrypt.compare(currentPassword, user.password);
 
     if (!validPassword) {
-      return res.status(400).json({ error: "inval id password" });
+      return res.status(400).json({ error: "Invalid password" });
     }
 
     const salt = await bcrypt.genSalt(10);
