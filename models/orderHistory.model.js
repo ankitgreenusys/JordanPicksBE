@@ -14,10 +14,6 @@ const orderHistorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "vslPackage",
   },
-  date: {
-    type: Date,
-    required: true,
-  },
   status: {
     type: String,
     enum: ["active", "inactive"],

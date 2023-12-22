@@ -5,7 +5,6 @@ const contactModel = require("../models/contact.model");
 const orderHistoryModel = require("../models/orderHistory.model");
 const packageModel = require("../models/package.model");
 const vslPackageModel = require("../models/vslPackage.model");
-const betModel = require("../models/bet.model");
 const userModel = require("../models/user.model");
 
 const {
@@ -355,10 +354,10 @@ routes.addVslPackage = async (req, res) => {
 
 routes.updatePackageStatus = async (req, res) => {
   const { id } = req.params;
-  let { status, runningStatus } = req.body;
+  let { status, result } = req.body;
 
   try {
-    console.log(id, status, runningStatus);
+    console.log(id, status, result);
     const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
@@ -369,13 +368,27 @@ routes.updatePackageStatus = async (req, res) => {
       status = package.status;
     }
 
-    if (!runningStatus) {
-      runningStatus = package.runningStatus;
+    if (!result) {
+      result = package.result;
+    }
+
+    if (result === "lose") {
+      //credit price to all users wallet who bought 
+      const orders = await orderHistoryModel.find({ package: id });
+
+      orders.forEach(async (order) => {
+        await userModel.findOneAndUpdate(
+          { _id: order.user },
+          { $inc: { wallet: order.package.price } },
+          { new: true }
+        );
+      });
+      
     }
 
     const updatedPackage = await packageModel.findOneAndUpdate(
       { _id: id },
-      { status, runningStatus },
+      { status, runningStatus: result },
       { new: true }
     );
 

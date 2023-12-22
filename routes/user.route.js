@@ -15,5 +15,6 @@ router.post("/contact", auth, userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntent", auth, userController.buyPackage);
-
+router.post("/validatePayment", auth, userController.validPayment);
+router.post("/walletWithdraw", auth, userController.walletWithdraw);
 module.exports = router;

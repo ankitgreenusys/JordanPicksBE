@@ -4,7 +4,7 @@ const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const bcrypt = require("bcryptjs");
-const sendOTP = require("../utils/sendOtp.utils");
+// const sendOTP = require("../utils/sendOtp.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
 
@@ -180,11 +180,12 @@ routes.userDashboard = async (req, res) => {
 
     console.log(id);
 
-    const user = await userModel
-      .findById(id)
-      .populate("package")
-      .populate("vslPackage")
-      .populate("orderHistory");
+    const user = await userModel.findById(id).populate({
+      path: "orderHistory",
+      populate: [{ path: "package" }, { path: "vslPackage" }],
+    });
+
+    console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -254,19 +255,137 @@ routes.getPackage = async (req, res) => {
 };
 
 const stripe = require("stripe")(
-  "sk_test_51O7tf8SFrCuULYACU8Sm2XF25Qh9lTjCfxJOWtTo0ktgyay8jjxbT0X8J4BQXfhPELO1R0KsSc3xekFe7AyF7u6y00pCTYCZzb"
+  "sk_test_51OQ3f7SDVopylE37C1IeFLNvQSQRAQblH40WfdGaVQBrdmOYF6tlnZJ0kn8Cu5c6Fm0DGdxyMbDx8FJVMUsgSgWV00vaSweCpN"
 );
 routes.buyPackage = async (req, res) => {
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: 2000,
-    currency: "usd",
-    automatic_payment_methods: {
-      enabled: true,
-    },
-  });
-  return res.send({
-    clientSecret: paymentIntent.client_secret,
-  });
+  try {
+    const { packageId } = req.body;
+    const id = req.userId;
+
+    const user = await userModel.findById(id);
+    const package = await packageModel.findById(packageId);
+
+    console.log(package);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (package.endDate < Date.now()) {
+      return res.status(400).json({ error: "package expired" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      description: package.name,
+      shipping: {
+        name: user.name,
+        address: {
+          line1: "510 Townsend St",
+          postal_code: "98140",
+          city: "San Francisco",
+          state: "CA",
+          country: "US",
+        },
+      },
+      amount: package.price * 100,
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+
+    console.log(paymentIntent);
+
+    return res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.validPayment = async (req, res) => {
+  const { paymentIntentId, packageId } = req.body;
+  const id = req.userId;
+  console.log(req.body, id);
+  console.log(paymentIntentId);
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    console.log(paymentIntent);
+
+    if (paymentIntent.status === "succeeded") {
+      const package = await packageModel.findById(packageId);
+      const user = await userModel.findById(id);
+      console.log(package, user);
+
+      if (!user) {
+        return res.status(404).json({ error: "user not found" });
+      }
+      if (!package) {
+        return res.status(404).json({ error: "Package not found" });
+      }
+
+      const order = await orderHistoryModel.create({
+        user: id,
+        package: packageId,
+        status: "active",
+      });
+
+      user.package.push(package._id);
+      user.orderHistory.push(order._id);
+      await user.save();
+    }
+
+    return res.send({
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ status: "Failed" });
+  }
+};
+
+routes.walletWithdraw = async (req, res) => {
+  try {
+    const id = req.userId;
+    const { packageId } = req.body;
+
+    const user = await userModel.findById(id);
+    const package = await packageModel.findById(packageId);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (user.wallet < package.price) {
+      return res.status(400).json({ error: "insufficient balance" });
+    }
+
+    user.wallet = user.wallet - package.price;
+
+    const newOrder = await orderHistoryModel.create({
+      user: id,
+      package: packageId,
+      status: "active",
+    });
+
+    user.orderHistory.push(newOrder._id);
+    user.package.push(packageId);
+
+    await user.save();
+
+    return res.status(200).json({ msg: "success", dta: user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
 };
 
 module.exports = routes;
