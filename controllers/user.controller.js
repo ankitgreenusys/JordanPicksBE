@@ -245,9 +245,14 @@ routes.updateProfile = async (req, res) => {
 
 routes.getPackage = async (req, res) => {
   try {
+    const uid = req.userId;
     const id = req.params.id;
     const package = await packageModel.findById(id);
-    return res.status(200).json({ msg: "success", dta: package });
+    const user = await userModel.findById(id);
+
+    const isBuied = user.package.find((item) => item === id);
+    
+    return res.status(200).json({ msg: "success", dta: package, isBuied });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
