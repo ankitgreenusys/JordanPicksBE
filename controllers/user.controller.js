@@ -185,7 +185,7 @@ routes.userDashboard = async (req, res) => {
       populate: [{ path: "package" }, { path: "vslPackage" }],
     });
 
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -248,9 +248,9 @@ routes.getPackage = async (req, res) => {
     const uid = req.userId;
     const id = req.params.id;
     const package = await packageModel.findById(id);
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).populate("package")
 
-    const isBuied = user.package.find((item) => item === id);
+    const isBuied = user.package.find((item) => item._id === id);
     
     return res.status(200).json({ msg: "success", dta: package, isBuied });
   } catch (error) {
