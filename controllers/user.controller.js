@@ -270,6 +270,10 @@ routes.buyPackage = async (req, res) => {
       return res.status(404).json({ error: "user not found" });
     }
 
+    if (user.package.includes(packageId)) {
+      return res.status(400).json({ error: "package already purchased" });
+    }
+
     if (!package) {
       return res.status(404).json({ error: "package not found" });
     }
@@ -324,6 +328,9 @@ routes.validPayment = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: "user not found" });
       }
+      if (user.package.includes(packageId)) {
+        return res.status(400).json({ error: "package already purchased" });
+      }
       if (!package) {
         return res.status(404).json({ error: "Package not found" });
       }
@@ -358,6 +365,9 @@ routes.walletWithdraw = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
+    }
+    if (user.package.includes(packageId)) {
+      return res.status(400).json({ error: "package already purchased" });
     }
 
     if (!package) {

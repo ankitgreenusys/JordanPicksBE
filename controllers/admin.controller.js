@@ -177,7 +177,7 @@ routes.pastPackages = async (req, res) => {
   //   console.log(error);
   //   return res.status(500).json({ error: "internal server error" });
   // }
-}
+};
 
 routes.packageById = async (req, res) => {
   const { id } = req.params;
@@ -373,8 +373,11 @@ routes.updatePackageStatus = async (req, res) => {
     }
 
     if (result === "lose") {
-      //credit price to all users wallet who bought 
-      const orders = await orderHistoryModel.find({ package: id });
+      //credit price to all users wallet who bought
+      const orders = await orderHistoryModel
+        .find({ package: id })
+        .populate("user")
+        .populate("package");
 
       orders.forEach(async (order) => {
         await userModel.findOneAndUpdate(
@@ -383,12 +386,11 @@ routes.updatePackageStatus = async (req, res) => {
           { new: true }
         );
       });
-      
     }
 
     const updatedPackage = await packageModel.findOneAndUpdate(
       { _id: id },
-      { status, runningStatus: result },
+      { status, result },
       { new: true }
     );
 
