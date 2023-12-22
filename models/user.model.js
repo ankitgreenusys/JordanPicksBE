@@ -33,7 +33,7 @@ const user = mongoose.Schema({
   },
   wallet: {
     type: Number,
-    default: 0,
+    default: 25,
   },
   package: [
     {
