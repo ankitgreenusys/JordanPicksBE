@@ -21,7 +21,7 @@ const orderHistorySchema = new mongoose.Schema({
   },
   desc : {
     type: String,
-  }
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
