@@ -248,7 +248,9 @@ routes.getPackage = async (req, res) => {
     const uid = req.userId;
     const id = req.params.id;
     const package = await packageModel.findById(id);
-    const user = await userModel.findById(uid).populate("package")
+    const user = await userModel.findById(uid);
+
+    console.log(user);
 
     const isBuied = user.package.find((item) => item._id === id);
     let isBought = false;
