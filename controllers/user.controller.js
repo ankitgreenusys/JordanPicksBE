@@ -193,9 +193,9 @@ routes.userDashboard = async (req, res) => {
 
     // Total Wins and Losses
 
-    const totalWins = user.orderHistory.package.filter((item) => item.result === "win");
-    const totalLosses = user.orderHistory.package.filter((item) => item.result === "lose");
-    const totalTies = user.orderHistory.package.filter((item) => item.result === "tie");
+    const totalWins = user.orderHistory.filter((item) => item.package.result === "win");
+    const totalLosses = user.orderHistory.filter((item) => item.package.result === "lose");
+    const totalTies = user.orderHistory.filter((item) => item.package.result === "tie");
 
     return res.status(200).json({
       msg: "success",
