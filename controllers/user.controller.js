@@ -252,7 +252,9 @@ routes.getPackage = async (req, res) => {
 
     console.log(user);
 
-    const isBuied = user.package.find((item) => item._id === id);
+    const isBuied = user.package.find((item) => { 
+      console.log(item._id);
+      return item._id == id });
     let isBought = false;
     if (isBuied)
       isBought = true;
