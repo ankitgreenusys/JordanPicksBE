@@ -402,6 +402,9 @@ routes.updatePackageStatus = async (req, res) => {
       });
     }
 
+    if (result !== "pending")
+       status = "inactive";
+
     const updatedPackage = await packageModel.findOneAndUpdate(
       { _id: id },
       { status, result },
