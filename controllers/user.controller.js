@@ -193,9 +193,15 @@ routes.userDashboard = async (req, res) => {
 
     // Total Wins and Losses
 
-    const totalWins = user.orderHistory.filter((item) => item.package.result === "win");
-    const totalLosses = user.orderHistory.filter((item) => item.package.result === "lose");
-    const totalTies = user.orderHistory.filter((item) => item.package.result === "tie");
+    const totalWins = user.orderHistory.filter(
+      (item) => item.package?.result === "win"
+    );
+    const totalLosses = user.orderHistory.filter(
+      (item) => item.package?.result === "lose"
+    );
+    const totalTies = user.orderHistory.filter(
+      (item) => item.package?.result === "tie"
+    );
 
     return res.status(200).json({
       msg: "success",
@@ -248,16 +254,16 @@ routes.getPackage = async (req, res) => {
     const uid = req.userId;
     const id = req.params.id;
     const package = await packageModel.findById(id);
-    const user = await userModel.findById(uid).populate("package")
+    const user = await userModel.findById(uid).populate("package");
 
     console.log(user);
 
-    const isBuied = user.package.find((item) => { 
+    const isBuied = user.package.find((item) => {
       console.log(item._id);
-      return item._id == id });
+      return item._id == id;
+    });
     let isBought = false;
-    if (isBuied)
-      isBought = true;
+    if (isBuied) isBought = true;
 
     console.log(isBuied);
 
@@ -268,10 +274,8 @@ routes.getPackage = async (req, res) => {
   }
 };
 
-const stripe = require("stripe")(
-  "sk_test_51OQ3f7SDVopylE37C1IeFLNvQSQRAQblH40WfdGaVQBrdmOYF6tlnZJ0kn8Cu5c6Fm0DGdxyMbDx8FJVMUsgSgWV00vaSweCpN"
-);
 routes.buyPackage = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   try {
     const { packageId } = req.body;
     const id = req.userId;
