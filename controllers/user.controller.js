@@ -329,6 +329,7 @@ routes.buyPackage = async (req, res) => {
 };
 
 routes.validPayment = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   const { paymentIntentId, packageId } = req.body;
   const id = req.userId;
   console.log(req.body, id);
