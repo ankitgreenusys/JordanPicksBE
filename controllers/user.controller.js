@@ -5,6 +5,7 @@ const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const bcrypt = require("bcryptjs");
 const sendOTP = require("../utils/sendOtp.utils");
+const sendMsg = require("../utils/sendMsg.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
 
@@ -58,6 +59,12 @@ routes.createUser = async (req, res) => {
     await sendOTP(
       newuser.email,
       "add-reward",
+      "JordansPicks - Claim your $25 bonus"
+    );
+
+    await sendMsg(
+      newuser.email,
+      newuser.name,
       "JordansPicks - Welcome to JordansPicks"
     );
 
