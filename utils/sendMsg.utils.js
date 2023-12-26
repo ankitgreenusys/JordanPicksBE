@@ -1,8 +1,8 @@
 const nodemailer = require("nodemailer");
 
 const emailtemplateotp = (name) => {
-  return `<>
-    Hi ${{ name }},
+  return `<div>
+    Hi ${name},
     Thank you for signing up to Jordanspicks.com, the ultimate destination for sports betting enthusiasts!
     You have made a smart choice by joining our community of winners. As a valued member, you will enjoy the following benefits:
     - Access to amazing sports pick packages for various leagues and events, including NFL, NBA, MLB, NHL, UFC, and more!
@@ -14,7 +14,7 @@ const emailtemplateotp = (name) => {
     If you have any questions or feedback, please feel free to contact us at support@jordanspicks.com. We are always happy to hear from you.
     Happy betting!
     Jordan and the Jordanspicks.com team
-  </>`;
+  </div>`;
 };
 
 const sendOTP = async (email, otp, title) => {
