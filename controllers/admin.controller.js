@@ -127,7 +127,7 @@ routes.allPackages = async (req, res) => {
   try {
     const packages = await packageModel.find({
       result: "pending",
-      isDeleted: false,
+      // isDeleted: false,
     });
 
     const limit = 10;

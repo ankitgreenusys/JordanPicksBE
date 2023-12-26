@@ -321,7 +321,7 @@ routes.getPackage = async (req, res) => {
 routes.buyPackage = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   try {
-    const { packageId } = req.body;
+    const { packageId,amount } = req.body;
     const id = req.userId;
 
     const user = await userModel.findById(id);
@@ -356,7 +356,7 @@ routes.buyPackage = async (req, res) => {
           country: "US",
         },
       },
-      amount: package.price * 100,
+      amount: amount * 100,
       currency: "usd",
       payment_method_types: ["card"],
     });
