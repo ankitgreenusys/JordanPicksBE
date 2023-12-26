@@ -125,7 +125,10 @@ routes.allPackages = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const packages = await packageModel.find({ result: "pending" });
+    const packages = await packageModel.find({
+      result: "pending",
+      isDeleted: false,
+    });
 
     const limit = 10;
     const totalPages = Math.ceil(packages.length / limit);
@@ -186,7 +189,7 @@ routes.packageById = async (req, res) => {
     const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     return res.status(201).json({ msg: "success", dta: package });
@@ -228,7 +231,7 @@ routes.vslPackageById = async (req, res) => {
     const package = await vslPackageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     return res.status(201).json({ msg: "success", dta: package });
@@ -292,7 +295,8 @@ routes.overview = async (req, res) => {
 
 routes.addPackage = async (req, res) => {
   try {
-    const { name, price, bets, description, gamePreview, endDate } = req.body;
+    const { name, price, bets, description, gamePreview, endDate, videoURL } =
+      req.body;
 
     const newPackage = await packageModel.create({
       name,
@@ -301,6 +305,7 @@ routes.addPackage = async (req, res) => {
       description,
       gamePreview,
       bets,
+      videoURL,
     });
 
     // bets.forEach(async (bet) => {
@@ -333,6 +338,7 @@ routes.addVslPackage = async (req, res) => {
       startDate,
       endDate,
       saleTitle,
+      videoURL,
     } = req.body;
 
     const newPackage = await vslPackageModel.create({
@@ -345,6 +351,7 @@ routes.addVslPackage = async (req, res) => {
       endDate,
       saleTitle,
       bets,
+      videoURL,
     });
 
     // bets.forEach(async (bet) => {
@@ -375,7 +382,7 @@ routes.updatePackageStatus = async (req, res) => {
     const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     if (!status) {
@@ -399,11 +406,24 @@ routes.updatePackageStatus = async (req, res) => {
           { $inc: { wallet: order.package.price } },
           { new: true }
         );
+
+        const newOrder = orderHistoryModel.create({
+          user: order.user,
+          package: order.package,
+          status: "inactive",
+          desc: "wallet credited",
+          price: order.package.price,
+        });
+
+        await userModel.findOneAndUpdate(
+          { _id: order.user },
+          { $push: { orderHistory: newOrder._id } },
+          { new: true }
+        );
       });
     }
 
-    if (result !== "pending")
-       status = "inactive";
+    if (result !== "pending") status = "inactive";
 
     const updatedPackage = await packageModel.findOneAndUpdate(
       { _id: id },
@@ -460,7 +480,7 @@ routes.updateVslPackageStatus = async (req, res) => {
     const package = await vslPackageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     if (!status) {
@@ -520,13 +540,14 @@ routes.updateVslPackageStatus = async (req, res) => {
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
-  const { name, price, bets, description, gamePreview, endDate } = req.body;
+  const { name, price, bets, description, gamePreview, endDate, videoURL } =
+    req.body;
   // const newBets = JSON.parse(bets);/
 
   try {
     const package = await packageModel.findById(id);
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     const updatedPackage = await packageModel.findOneAndUpdate(
@@ -538,6 +559,7 @@ routes.updatePackage = async (req, res) => {
         description,
         gamePreview,
         bets,
+        videoURL,
       },
       { new: true }
     );
@@ -589,13 +611,14 @@ routes.updateVslPackage = async (req, res) => {
     startDate,
     endDate,
     saleTitle,
+    videoURL,
   } = req.body;
 
   try {
     const package = await vslPackageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
     const updatedPackage = await vslPackageModel.findOneAndUpdate(
@@ -610,6 +633,7 @@ routes.updateVslPackage = async (req, res) => {
         startDate,
         endDate,
         saleTitle,
+        videoURL,
       },
       { new: true }
     );
@@ -627,11 +651,25 @@ routes.deletePackage = async (req, res) => {
   try {
     const package = await packageModel.findOne({ _id: id });
 
+    console.log(package);
+
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
-    await packageModel.findOneAndDelete({ _id: id });
+    if (package.status === "active") {
+      return res.status(404).json({ error: "package is active" });
+    }
+
+    if (package.result === "pending") {
+      return res.status(404).json({ error: "package is pending" });
+    }
+
+    await packageModel.findOneAndUpdate(
+      { _id: id },
+      { isDeleted: true },
+      { new: true }
+    );
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {
@@ -647,16 +685,94 @@ routes.deleteVslPackage = async (req, res) => {
     const package = await vslPackageModel.findOne({ _id: id });
 
     if (!package) {
-      return res.status(404).json({ msg: "package not found" });
+      return res.status(404).json({ error: "package not found" });
     }
 
-    await vslPackageModel.findOneAndDelete({ _id: id });
+    if (package.status === "active") {
+      return res.status(404).json({ error: "package is active" });
+    }
+
+    if (package.result !== "pending") {
+      return res.status(404).json({ error: "package is pending" });
+    }
+
+    await vslPackageModel.findOneAndUpdate(
+      { _id: id },
+      { isDeleted: true },
+      { new: true }
+    );
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
   }
+};
+
+routes.deletedPackages = async (req, res) => {
+  const { page } = req.query;
+
+  try {
+    const packages = await packageModel.find({ isDeleted: true });
+
+    const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = packages.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+
+  // try {
+  //   const packages = await packageModel.find({ isDeleted: true });
+  //   return res.status(201).json({ msg: "success", dta: packages });
+  // } catch (error) {
+  //   console.log(error);
+  //   return res.status(500).json({ error: "internal server error" });
+  // }
+};
+
+routes.deletedVslPackages = async (req, res) => {
+  const { page } = req.query;
+
+  try {
+    const packages = await vslPackageModel.find({ isDeleted: true });
+
+    const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = packages.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+
+  // try {
+  //   const packages = await vslPackageModel.find({ isDeleted: true });
+  //   return res.status(201).json({ msg: "success", dta: packages });
+  // } catch (error) {
+  //   console.log(error);
+  //   return res.status(500).json({ error: "internal server error" });
+  // }
 };
 
 module.exports = routes;

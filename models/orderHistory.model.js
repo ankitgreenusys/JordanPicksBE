@@ -19,8 +19,11 @@ const orderHistorySchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "inactive",
   },
-  desc : {
+  desc: {
     type: String,
+  },
+  price: {
+    type: Number,
   },
   createdAt: {
     type: Date,

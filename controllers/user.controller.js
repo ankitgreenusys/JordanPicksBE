@@ -4,7 +4,7 @@ const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const bcrypt = require("bcryptjs");
-// const sendOTP = require("../utils/sendOtp.utils");
+const sendOTP = require("../utils/sendOtp.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
 
@@ -54,6 +54,12 @@ routes.createUser = async (req, res) => {
     );
 
     const newuser = newUser.toObject();
+
+    await sendOTP(
+      newuser.email,
+      "add-reward",
+      "JordansPicks - Welcome to JordansPicks"
+    );
 
     newuser.token = token;
     newuser.refreshToken = refreshToken;
@@ -111,6 +117,37 @@ routes.login = async (req, res) => {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
   }
+};
+
+routes.getBonus = async (req, res) => {
+  const id = req.userId;
+
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return res.status(404).json({ error: "user not found" });
+  }
+
+  if (user.bonus) {
+    return res.status(400).json({ error: "Bonus already claimed" });
+  }
+
+  user.bonus = true;
+  user.wallet = user.wallet + 25;
+
+  await user.save();
+
+  const newOrder = await orderHistoryModel.create({
+    user: id,
+    status: "active",
+    desc: `Bonus claimed`,
+    price: 25,
+  });
+
+  user.orderHistory.push(newOrder._id);
+  await user.save();
+
+  return res.status(200).json({ msg: "success", dta: user });
 };
 
 routes.refreshAccessToken = async (req, res) => {
@@ -330,7 +367,8 @@ routes.buyPackage = async (req, res) => {
 
 routes.validPayment = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-  const { paymentIntentId, packageId } = req.body;
+  const { paymentIntentId, packageId, walletDeduction, cardDeduction } =
+    req.body;
   const id = req.userId;
   console.log(req.body, id);
   console.log(paymentIntentId);
@@ -348,7 +386,7 @@ routes.validPayment = async (req, res) => {
         return res.status(404).json({ error: "user not found" });
       }
       if (user.package.includes(packageId)) {
-        return res.status(400).json({ error: "package already purchased" });
+        return res.status(400).json({ error: "Package already purchased" });
       }
       if (!package) {
         return res.status(404).json({ error: "Package not found" });
@@ -358,10 +396,25 @@ routes.validPayment = async (req, res) => {
         user: id,
         package: packageId,
         status: "active",
+        desc: `Package - ${package.name} purchased`,
+        price: cardDeduction,
       });
+
+      if (walletDeduction > 0) {
+        const walletOrder = await orderHistoryModel.create({
+          user: id,
+          package: packageId,
+          status: "active",
+          desc: `Package - ${package.name} purchased`,
+          price: walletDeduction,
+        });
+        user.orderHistory.push(walletOrder._id);
+        user.wallet = user.wallet - walletDeduction;
+      }
 
       user.package.push(package._id);
       user.orderHistory.push(order._id);
+
       await user.save();
     }
 
@@ -403,6 +456,7 @@ routes.walletWithdraw = async (req, res) => {
       user: id,
       package: packageId,
       status: "active",
+      desc: `Package - ${package.name} purchased`,
     });
 
     user.orderHistory.push(newOrder._id);

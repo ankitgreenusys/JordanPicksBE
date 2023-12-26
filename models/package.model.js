@@ -28,12 +28,19 @@ const packageSchema = new mongoose.Schema({
   bets: {
     type: Array,
   },
+  videoURL: {
+    type: String,
+  },
   status: {
     type: String,
     enum: ["active", "inactive"],
     default: "inactive",
   },
   runningStatus: {
+    type: Boolean,
+    default: false,
+  },
+  isDeleted: {
     type: Boolean,
     default: false,
   },

@@ -25,5 +25,7 @@ router.put("/updatePackage/:id", auth, controller.updatePackage);
 router.put("/updateVslPackage/:id", auth, controller.updateVslPackage);
 router.delete("/deletePackage/:id", auth, controller.deletePackage);
 router.delete("/deleteVslPackage/:id", auth, controller.deleteVslPackage);
+router.get("/deletedPackages", auth, controller.deletedPackages);
+router.get("/deletedVslPackages", auth, controller.deletedVslPackages);
 
 module.exports = router;
