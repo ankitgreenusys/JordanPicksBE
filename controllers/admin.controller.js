@@ -400,23 +400,60 @@ routes.updatePackageStatus = async (req, res) => {
         .populate("user")
         .populate("package");
 
+      const user = new Set([]);
+
       orders.forEach(async (order) => {
+        user.add(order.user._id);
+      });
+
+      // set to array
+      const uniqueuser = Array.from(user);
+
+      // user.forEach(async (order) => {
+
+      //   if (user.has(order.user._id)) {
+      //     return;
+      //   }
+      //   await userModel.findOneAndUpdate(
+      //     { _id: order.user },
+      //     { $inc: { wallet: order.package.price } },
+      //     { new: true }
+      //   );
+
+      //   const newOrder = await orderHistoryModel.create({
+      //     user: order.user,
+      //     package: order.package,
+      //     status: "inactive",
+      //     desc: "wallet credited",
+      //     price: order.package.price,
+      //   });
+
+      //   await userModel.findOneAndUpdate(
+      //     { _id: order.user },
+      //     { $push: { orderHistory: newOrder._id } },
+      //     { new: true }
+      //   );
+
+      //   user.add(order.user._id);
+      // });
+
+      uniqueuser.forEach(async (userId) => {
         await userModel.findOneAndUpdate(
-          { _id: order.user },
-          { $inc: { wallet: order.package.price } },
+          { _id: userId },
+          { $inc: { wallet: orders[0].package.price } },
           { new: true }
         );
 
-        const newOrder = orderHistoryModel.create({
-          user: order.user,
-          package: order.package,
+        const newOrder = await orderHistoryModel.create({
+          user: userId,
+          package: id,
           status: "inactive",
           desc: "wallet credited",
-          price: order.package.price,
+          price: orders[0].package.price,
         });
 
         await userModel.findOneAndUpdate(
-          { _id: order.user },
+          { _id: userId },
           { $push: { orderHistory: newOrder._id } },
           { new: true }
         );
@@ -474,28 +511,99 @@ routes.updatePackageStatus = async (req, res) => {
 
 routes.updateVslPackageStatus = async (req, res) => {
   const { id } = req.params;
-  const { status, runningStatus } = req.body;
+  let { status, result } = req.body;
+
+  if (!package) {
+    return res.status(404).json({ error: "package not found" });
+  }
+
+  if (!status) {
+    status = package.status;
+  }
+
+  if (!result) {
+    result = package.result;
+  }
+
+  if (result === "lose") {
+    //credit price to all users wallet who bought
+    const orders = await orderHistoryModel
+      .find({ package: id })
+      .populate("user")
+      .populate("vslPackage");
+
+    const user = new Set([]);
+
+    orders.forEach(async (order) => {
+      user.add(order.user._id);
+    });
+
+    // set to array
+    const uniqueuser = Array.from(user);
+
+    // user.forEach(async (order) => {
+
+    //   if (user.has(order.user._id)) {
+    //     return;
+    //   }
+    //   await userModel.findOneAndUpdate(
+    //     { _id: order.user },
+    //     { $inc: { wallet: order.package.price } },
+    //     { new: true }
+    //   );
+
+    //   const newOrder = await orderHistoryModel.create({
+    //     user: order.user,
+    //     package: order.package,
+    //     status: "inactive",
+    //     desc: "wallet credited",
+    //     price: order.package.price,
+    //   });
+
+    //   await userModel.findOneAndUpdate(
+    //     { _id: order.user },
+    //     { $push: { orderHistory: newOrder._id } },
+    //     { new: true }
+    //   );
+
+    //   user.add(order.user._id);
+    // });
+
+    uniqueuser.forEach(async (userId) => {
+      await userModel.findOneAndUpdate(
+        { _id: userId },
+        { $inc: { wallet: orders[0].vslPackage.discountedPrice } },
+        { new: true }
+      );
+
+      const newOrder = await orderHistoryModel.create({
+        user: userId,
+        vslPackage: id,
+        status: "inactive",
+        desc: "wallet credited",
+        price: orders[0].vslPackage.discountedPrice,
+      });
+
+      await userModel.findOneAndUpdate(
+        { _id: userId },
+        { $push: { orderHistory: newOrder._id } },
+        { new: true }
+      );
+    });
+  }
+
+  if (result !== "pending") status = "inactive";
+
+  const updatedPackage = await packageModel.findOneAndUpdate(
+    { _id: id },
+    { status, result },
+    { new: true }
+  );
+
+  return res.status(201).json({ msg: "success", dta: updatedPackage });
 
   try {
     const package = await vslPackageModel.findOne({ _id: id });
-
-    if (!package) {
-      return res.status(404).json({ error: "package not found" });
-    }
-
-    if (!status) {
-      status = package.status;
-    }
-
-    if (!runningStatus) {
-      runningStatus = package.runningStatus;
-    }
-
-    const updatedPackage = await vslPackageModel.findOneAndUpdate(
-      { _id: id },
-      { status, runningStatus },
-      { new: true }
-    );
 
     return res.status(201).json({ msg: "success", dta: updatedPackage });
   } catch (error) {

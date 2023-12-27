@@ -48,6 +48,7 @@ const vslPackageSchema = new mongoose.Schema({
   result: {
     type: String,
     enum: ["win", "lose", "tie", "pending"],
+    default: "pending",
   },
   videoURL: {
     type: String,
