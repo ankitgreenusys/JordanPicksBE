@@ -45,6 +45,10 @@ const vslPackageSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  pageCount: {
+    type: Number,
+    default: 0,
+  },
   result: {
     type: String,
     enum: ["win", "lose", "tie", "pending"],

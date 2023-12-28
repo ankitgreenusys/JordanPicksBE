@@ -36,6 +36,10 @@ const packageSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "inactive",
   },
+  pageCount: {
+    type: Number,
+    default: 0,
+  },
   runningStatus: {
     type: Boolean,
     default: false,

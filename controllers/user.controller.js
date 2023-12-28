@@ -303,6 +303,16 @@ routes.getPackage = async (req, res) => {
 
     console.log(user);
 
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (!package.pageCount) package.pageCount = 0;
+
+    package.pageCount = package.pageCount + 1;
+
+    await package.save();
+
     const isBuied = user.package.find((item) => {
       console.log(item._id);
       return item._id == id;
@@ -325,6 +335,16 @@ routes.getVslPackage = async (req, res) => {
     const id = req.params.id;
     const package = await vslPackageModel.findById(id);
     const user = await userModel.findById(uid).populate("vslPackage");
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (!package.pageCount) package.pageCount = 0;
+
+    package.pageCount = package.pageCount + 1;
+
+    await package.save();
 
     console.log(user);
 

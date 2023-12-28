@@ -475,6 +475,22 @@ routes.updatePackageStatus = async (req, res) => {
   }
 };
 
+routes.getPackagePageCount = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const package = await packageModel.findOne({ _id: id });
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: package.pageCount });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 // routes.updatePackageBetStatus = async (req, res) => {
 //   const { id } = req.params;
 //   const { betId, status } = req.body;
@@ -601,15 +617,6 @@ routes.updateVslPackageStatus = async (req, res) => {
   );
 
   return res.status(201).json({ msg: "success", dta: updatedPackage });
-
-  try {
-    const package = await vslPackageModel.findOne({ _id: id });
-
-    return res.status(201).json({ msg: "success", dta: updatedPackage });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "internal server error" });
-  }
 };
 
 // routes.updateVslPackageBetStatus = async (req, res) => {
@@ -645,6 +652,22 @@ routes.updateVslPackageStatus = async (req, res) => {
 //     return res.status(500).json({ error: "internal server error" });
 //   }
 // };
+
+routes.getVslPackagePageCount = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const package = await vslPackageModel.findOne({ _id: id });
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: package.pageCount });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
