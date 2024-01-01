@@ -394,7 +394,8 @@ routes.buyPackage = async (req, res) => {
       return res.status(400).json({ error: "amount must be greater than 0" });
 
     // const newamount = amount.toFixed(2);
-    console.log(amount);
+    console.log((amount*100).toFixed(0));
+    // const newamount = 
 
     const paymentIntent = await stripe.paymentIntents.create({
       description: package.name,
