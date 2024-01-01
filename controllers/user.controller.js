@@ -409,7 +409,7 @@ routes.buyPackage = async (req, res) => {
           country: "US",
         },
       },
-      amount: amount * 100,
+      amount: (amount*100).toFixed(0),
       currency: "usd",
       payment_method_types: ["card"],
     });
@@ -536,7 +536,7 @@ routes.buyVslPackage = async (req, res) => {
           country: "US",
         },
       },
-      amount: amount * 100,
+      amount: (amount*100).toFixed(0),
       currency: "usd",
       payment_method_types: ["card"],
     });
