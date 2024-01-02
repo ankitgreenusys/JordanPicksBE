@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/signup", controller.createUser);
 router.post("/login", controller.login);
 router.get("/allUsers", auth, controller.allUsers);
+router.post("/changeUserBalance/:userId", auth, controller.changeUserBalance);
 router.get("/allPackages", auth, controller.allPackages);
 router.get("/pastPackages", auth, controller.pastPackages);
 router.get("/getPackage/:id", auth, controller.packageById);

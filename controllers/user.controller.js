@@ -4,9 +4,10 @@ const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const bcrypt = require("bcryptjs");
-const sendOTP = require("../utils/sendOtp.utils");
+const sendWelcomeMsg = require("../utils/sendWelcomeMsg.utils");
 const sendMsg = require("../utils/sendMsg.utils");
 const sendPayment = require("../utils/sendPayment.utils");
+const sendResetPassword = require("../utils/sendResetPassword.utils");
 const jwt = require("jsonwebtoken");
 const { emailValidation } = require("../validations/joi");
 
@@ -57,7 +58,7 @@ routes.createUser = async (req, res) => {
 
     const newuser = newUser.toObject();
 
-    await sendOTP(
+    await sendWelcomeMsg(
       newuser.email,
       "add-reward",
       "JordansPicks - Claim your $25 bonus"
@@ -121,6 +122,56 @@ routes.login = async (req, res) => {
     newuser.refreshToken = refreshToken;
 
     return res.status(201).json({ msg: "success", dta: newuser });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.resetemail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // const { error } = emailValidation.validate(req.body);
+
+    // if (error) {
+    //   return res.status(400).json({ error: error.details[0].message });
+    // }
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "email not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    user.otp = otp;
+    await user.save();
+
+    await sendResetPassword(
+      user.email,
+      user.name,
+      user.otp,
+      "JordansPicks - Reset Password"
+    );
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.resetpassword = async (req, res) => {
+  const { email, otp, password } = req.body;
+
+  try {
+
+    
+
+
+
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -394,8 +445,8 @@ routes.buyPackage = async (req, res) => {
       return res.status(400).json({ error: "amount must be greater than 0" });
 
     // const newamount = amount.toFixed(2);
-    console.log((amount*100).toFixed(0));
-    // const newamount = 
+    console.log((amount * 100).toFixed(0));
+    // const newamount =
 
     const paymentIntent = await stripe.paymentIntents.create({
       description: package.name,
@@ -409,7 +460,7 @@ routes.buyPackage = async (req, res) => {
           country: "US",
         },
       },
-      amount: (amount*100).toFixed(0),
+      amount: (amount * 100).toFixed(0),
       currency: "usd",
       payment_method_types: ["card"],
     });
@@ -536,7 +587,7 @@ routes.buyVslPackage = async (req, res) => {
           country: "US",
         },
       },
-      amount: (amount*100).toFixed(0),
+      amount: (amount * 100).toFixed(0),
       currency: "usd",
       payment_method_types: ["card"],
     });

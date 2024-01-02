@@ -1,4 +1,3 @@
-const sendOTP = require("../utils/sendOtp.utils");
 const jwt = require("jsonwebtoken");
 const adminModel = require("../models/admin.model");
 const contactModel = require("../models/contact.model");
@@ -90,6 +89,30 @@ routes.allUsers = async (req, res) => {
       totalPages,
       dta: result,
     });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.changeUserBalance = async (req, res) => {
+  const { userId } = req.params;
+  const { wallet } = req.body;
+
+  try {
+    const user = userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    const updatedUser = await userModel.findOneAndUpdate(
+      { _id: userId },
+      { wallet: wallet },
+      { new: true }
+    );
+
+    return res.status(201).json({ msg: "success", dta: updatedUser });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
