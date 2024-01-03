@@ -128,7 +128,7 @@ routes.login = async (req, res) => {
   }
 };
 
-routes.resetemail = async (req, res) => {
+routes.resetPassOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -146,17 +146,17 @@ routes.resetemail = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    user.otp = otp;
+    user.verificationCode = otp;
     await user.save();
 
     await sendResetPassword(
       user.email,
       user.name,
-      user.otp,
+      user.verificationCode,
       "JordansPicks - Reset Password"
     );
 
-    return res.status(201).json({ msg: "success" });
+    return res.status(201).json({ msg: "Email sent" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -167,11 +167,24 @@ routes.resetpassword = async (req, res) => {
   const { email, otp, password } = req.body;
 
   try {
+    const user = await userModel.findOne({ email });
 
-    
+    if (!user) {
+      return res.status(404).json({ error: "email not found" });
+    }
 
+    if (user.verificationCode !== otp) {
+      return res.status(400).json({ error: "invalid otp" });
+    }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
+    user.password = hashedPassword;
+    user.verificationCode = null;
+    await user.save();
+
+    return res.status(201).json({ msg: "success" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

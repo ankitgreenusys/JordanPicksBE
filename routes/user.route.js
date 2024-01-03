@@ -10,6 +10,8 @@ router.post("/signin", userController.createUser);
 router.post("/refreshtoken", userController.refreshAccessToken);
 router.get("/getBonus", auth, userController.getBonus);
 router.post("/login", userController.login);
+router.post("/resetPassOTP", userController.resetPassOTP);
+router.post("/resetPass", userController.resetpassword);
 router.get("/allPackage", userController.allActivePackages);
 router.get("/getPackage/:id", auth, userController.getPackage);
 router.get("/getVslPackage/:id", auth, userController.getVslPackage);
