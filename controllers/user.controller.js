@@ -42,6 +42,8 @@ routes.createUser = async (req, res) => {
       mobile,
       password: hashedPassword,
       username,
+      wallet: 25,
+      bonus: true,
     });
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
@@ -58,11 +60,11 @@ routes.createUser = async (req, res) => {
 
     const newuser = newUser.toObject();
 
-    await sendWelcomeMsg(
-      newuser.email,
-      "add-reward",
-      "JordansPicks - Claim your $25 bonus"
-    );
+    // await sendWelcomeMsg(
+    //   newuser.email,
+    //   "add-reward",
+    //   "JordansPicks - Claim your $25 bonus"
+    // );
 
     await sendMsg(
       newuser.email,
@@ -289,10 +291,13 @@ routes.userDashboard = async (req, res) => {
 
     console.log(id);
 
-    const user = await userModel.findById(id).populate({
-      path: "orderHistory",
-      populate: [{ path: "package" }, { path: "vslPackage" }],
-    });
+    const user = await userModel
+      .findById(id)
+      .populate([
+        { path: "orderHistory" },
+        { path: "package" },
+        { path: "vslPackage" },
+      ]);
 
     // console.log(user);
 
@@ -302,23 +307,50 @@ routes.userDashboard = async (req, res) => {
 
     // Total Wins and Losses
 
-    const totalWins = user.orderHistory.filter(
-      (item) => item.package?.result === "win"
+    const totalPackagesWins = user.package.filter(
+      (item) => item.result === "win"
     );
-    const totalLosses = user.orderHistory.filter(
-      (item) => item.package?.result === "lose"
+
+    const totalPackagesLosses = user.package.filter(
+      (item) => item.result === "lose"
     );
-    const totalTies = user.orderHistory.filter(
-      (item) => item.package?.result === "tie"
+
+    const totalPackagesTies = user.package.filter(
+      (item) => item.result === "tie"
+    );
+
+    const totalVslPackagesWins = user.vslPackage.filter(
+      (item) => item.result === "win"
+    );
+
+    const totalVslPackagesLosses = user.vslPackage.filter(
+      (item) => item.result === "lose"
+    );
+
+    const totalVslPackagesTies = user.vslPackage.filter(
+      (item) => item.result === "tie"
     );
 
     return res.status(200).json({
       msg: "success",
       dta: {
         user,
-        totalWins: totalWins.length,
-        totalLosses: totalLosses.length,
-        totalTies: totalTies.length,
+        // packageResult: {
+        //   totalPackagesWins: totalPackagesWins.length,
+        //   totalPackagesLosses: totalPackagesLosses.length,
+        //   totalPackagesTies: totalPackagesTies.length,
+        // },
+        // vslPackageResult: {
+        //   totalVslPackagesWins: totalVslPackagesWins.length,
+        //   totalVslPackagesLosses: totalVslPackagesLosses.length,
+        //   totalVslPackagesTies: totalVslPackagesTies.length,
+        // },
+        result: {
+          totalWins: totalPackagesWins.length + totalVslPackagesWins.length,
+          totalLosses:
+            totalPackagesLosses.length + totalVslPackagesLosses.length,
+          totalTies: totalPackagesTies.length + totalVslPackagesTies.length,
+        },
       },
     });
   } catch (error) {
@@ -716,6 +748,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       package: packageId,
       status: "active",
       desc: `Package - ${package.name} purchased`,
+      price: package.price,
     });
 
     user.orderHistory.push(newOrder._id);
@@ -770,6 +803,7 @@ routes.walletWithdrawVslPackage = async (req, res) => {
       vslPackage: packageId,
       status: "active",
       desc: `Package - ${package.name} purchased`,
+      price: package.discountedPrice,
     });
 
     user.orderHistory.push(newOrder._id);

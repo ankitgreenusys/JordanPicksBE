@@ -15,7 +15,7 @@ router.post("/resetPass", userController.resetpassword);
 router.get("/allPackage", userController.allActivePackages);
 router.get("/getPackage/:id", auth, userController.getPackage);
 router.get("/getVslPackage/:id", auth, userController.getVslPackage);
-router.post("/contact", auth, userController.contactUs);
+router.post("/contact", userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);

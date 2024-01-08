@@ -28,5 +28,6 @@ router.delete("/deletePackage/:id", auth, controller.deletePackage);
 router.delete("/deleteVslPackage/:id", auth, controller.deleteVslPackage);
 router.get("/deletedPackages", auth, controller.deletedPackages);
 router.get("/deletedVslPackages", auth, controller.deletedVslPackages);
+router.get("/bulkPackageMail", auth, controller.bulkPackageMail);
 
 module.exports = router;

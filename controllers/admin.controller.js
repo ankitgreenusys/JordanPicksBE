@@ -6,6 +6,8 @@ const packageModel = require("../models/package.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const userModel = require("../models/user.model");
 
+const sendAllPackage = require("../utils/sendAllPackageMsg.utils");
+
 const {
   createAdminValidation,
   loginValidation,
@@ -821,7 +823,7 @@ routes.deletePackage = async (req, res) => {
 
     await packageModel.findOneAndUpdate(
       { _id: id },
-      { isDeleted: true },
+      { isDeleted: true, status: "inactive" },
       { new: true }
     );
 
@@ -852,7 +854,7 @@ routes.deleteVslPackage = async (req, res) => {
 
     await vslPackageModel.findOneAndUpdate(
       { _id: id },
-      { isDeleted: true },
+      { isDeleted: true, status: "inactive" },
       { new: true }
     );
 
@@ -927,6 +929,32 @@ routes.deletedVslPackages = async (req, res) => {
   //   console.log(error);
   //   return res.status(500).json({ error: "internal server error" });
   // }
+};
+
+routes.bulkPackageMail = async (req, res) => {
+  // const { title, data } = req.body;
+
+  try {
+    const users = await userModel.find({ isVerified: true });
+    const allActivePackages = await packageModel.find({ status: "active" });
+
+    const data = allActivePackages.filter((item) => {
+      return new Date (item.endDate) > Date.now();
+    });
+
+    users.forEach(async (user) => {
+      await sendAllPackage(
+        user.email,
+        user.name,
+        "Jordanspicks.com packages out NOW!",
+        data
+      );
+    });
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    return res.status(500).json({ error: "internal server error" });
+  }
 };
 
 module.exports = routes;
