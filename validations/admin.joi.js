@@ -55,7 +55,8 @@ const updatePackageValidation = Joi.object({
   description: Joi.string().required(),
   gamePreview: Joi.string().required(),
   endDate: Joi.string().required(),
-  videoURL: Joi.string().required(),
+  // url
+  videoURL: Joi.string().uri().required(),
 });
 
 const updateVslPackageValidation = Joi.object({
@@ -68,7 +69,7 @@ const updateVslPackageValidation = Joi.object({
   startDate: Joi.string().required(),
   endDate: Joi.string().required(),
   saleTitle: Joi.string().required(),
-  videoURL: Joi.string().required(),
+  videoURL: Joi.string().uri().required(),
 });
 
 module.exports = {
