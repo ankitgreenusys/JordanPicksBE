@@ -9,7 +9,7 @@ const sendMsg = require("../utils/sendMsg.utils");
 const sendPayment = require("../utils/sendPayment.utils");
 const sendResetPassword = require("../utils/sendResetPassword.utils");
 const jwt = require("jsonwebtoken");
-const { emailValidation } = require("../validations/joi");
+const userValid = require("../validations/user.joi");
 
 const routes = {};
 
@@ -17,7 +17,7 @@ routes.createUser = async (req, res) => {
   try {
     const { name, email, mobile, password, username } = req.body;
 
-    const { error } = emailValidation.validate(req.body);
+    const { error } = userValid.createUserValidation.validate(req.body);
 
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
@@ -88,11 +88,11 @@ routes.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // const { error } = emailValidation.validate(req.body);
+    const { error } = userValid.loginValidation.validate(req.body);
 
-    // if (error) {
-    //   return res.status(400).json({ error: error.details[0].message });
-    // }
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const user = await userModel.findOne({ email });
 
@@ -134,11 +134,11 @@ routes.resetPassOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // const { error } = emailValidation.validate(req.body);
+    const { error } = userValid.resetPasswordOTPValidation.validate(req.body);
 
-    // if (error) {
-    //   return res.status(400).json({ error: error.details[0].message });
-    // }
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const user = await userModel.findOne({ email });
 
@@ -170,6 +170,12 @@ routes.resetpassword = async (req, res) => {
 
   try {
     const user = await userModel.findOne({ email });
+
+    const { error } = userValid.resetPasswordValidation.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -270,6 +276,12 @@ routes.contactUs = async (req, res) => {
   try {
     const { fName, lName, email, mobile, message } = req.body;
 
+    const { error } = userValid.contactUsValidation.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     const newContact = await contactModel.create({
       fName,
       lName,
@@ -363,6 +375,12 @@ routes.updateProfile = async (req, res) => {
   const id = req.userId;
 
   const { name, mobile, currentPassword, newPassword } = req.body;
+
+  const { error } = userValid.updateProfileValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
   const user = await userModel.findById(id);
 
@@ -466,6 +484,16 @@ routes.buyPackage = async (req, res) => {
     const { packageId, amount } = req.body;
     const id = req.userId;
 
+    const { error } = userValid.buyPackageValidation.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     const user = await userModel.findById(id);
     const package = await packageModel.findById(packageId);
 
@@ -526,6 +554,13 @@ routes.validPaymentPackage = async (req, res) => {
   const { paymentIntentId, packageId, walletDeduction, cardDeduction } =
     req.body;
   const id = req.userId;
+
+  const { error } = userValid.validPaymentPackageValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
   console.log(req.body, id);
   console.log(paymentIntentId);
   try {
@@ -552,7 +587,7 @@ routes.validPaymentPackage = async (req, res) => {
         user: id,
         package: packageId,
         status: "active",
-        desc: `Package - ${package.name} purchased`,
+        desc: `Package - ${package.name} purchased (card)`,
         price: cardDeduction,
       });
 
@@ -561,7 +596,7 @@ routes.validPaymentPackage = async (req, res) => {
           user: id,
           package: packageId,
           status: "active",
-          desc: `Package - ${package.name} purchased`,
+          desc: `Package - ${package.name} purchased (wallet)`,
           price: walletDeduction,
         });
         user.orderHistory.push(walletOrder._id);
@@ -596,6 +631,12 @@ routes.buyVslPackage = async (req, res) => {
   try {
     const { packageId, amount } = req.body;
     const id = req.userId;
+
+    const { error } = userValid.buyVslPackageValidation.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
 
     const user = await userModel.findById(id);
     const package = await vslPackageModel.findById(packageId);
@@ -652,6 +693,14 @@ routes.validPaymentVslPackage = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   const { paymentIntentId, packageId, walletDeduction, cardDeduction } =
     req.body;
+
+  const { error } = userValid.validPaymentVslPackageValidation.validate(
+    req.body
+  );
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
   const id = req.userId;
   console.log(req.body, id);
   console.log(paymentIntentId);
@@ -679,7 +728,7 @@ routes.validPaymentVslPackage = async (req, res) => {
         user: id,
         vslPackage: packageId,
         status: "active",
-        desc: `Package - ${package.name} purchased`,
+        desc: `Package - ${package.name} purchased (card)`,
         price: cardDeduction,
       });
 
@@ -688,7 +737,7 @@ routes.validPaymentVslPackage = async (req, res) => {
           user: id,
           vslPackage: packageId,
           status: "active",
-          desc: `Package - ${package.name} purchased`,
+          desc: `Package - ${package.name} purchased (wallet)`,
           price: walletDeduction,
         });
         user.orderHistory.push(walletOrder._id);
@@ -723,6 +772,14 @@ routes.walletWithdrawPackage = async (req, res) => {
     const id = req.userId;
     const { packageId } = req.body;
 
+    const { error } = userValid.walletWithdrawPackageValidation.validate(
+      req.body
+    );
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     const user = await userModel.findById(id);
     const package = await packageModel.findById(packageId);
 
@@ -747,7 +804,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       user: id,
       package: packageId,
       status: "active",
-      desc: `Package - ${package.name} purchased`,
+      desc: `Package - ${package.name} purchased (wallet)`,
       price: package.price,
     });
 
@@ -777,6 +834,14 @@ routes.walletWithdrawVslPackage = async (req, res) => {
     const id = req.userId;
     const { packageId } = req.body;
 
+    const { error } = userValid.walletWithdrawVslPackageValidation.validate(
+      req.body
+    );
+
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     const user = await userModel.findById(id);
     const package = await vslPackageModel.findById(packageId);
 
@@ -796,13 +861,13 @@ routes.walletWithdrawVslPackage = async (req, res) => {
       return res.status(400).json({ error: "insufficient balance" });
     }
 
-    user.wallet = user.wallet - package.price;
+    user.wallet = user.wallet - package.discountedPrice;
 
     const newOrder = await orderHistoryModel.create({
       user: id,
       vslPackage: packageId,
       status: "active",
-      desc: `Package - ${package.name} purchased`,
+      desc: `Package - ${package.name} purchased (wallet)`,
       price: package.discountedPrice,
     });
 

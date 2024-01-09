@@ -8,18 +8,14 @@ const userModel = require("../models/user.model");
 
 const sendAllPackage = require("../utils/sendAllPackageMsg.utils");
 
-const {
-  createAdminValidation,
-  loginValidation,
-} = require("../validations/joi");
-
+const adminValid = require("../validations/admin.joi");
 const routes = {};
 
 routes.createUser = async (req, res) => {
   try {
     const { email, name, password } = req.body;
 
-    const { error } = createAdminValidation.validate(req.body);
+    const { error } = adminValid.createAdminValidation.validate(req.body);
 
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
@@ -44,7 +40,7 @@ routes.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { error } = loginValidation.validate(req.body);
+    const { error } = adminValid.loginValidation.validate(req.body);
 
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
@@ -76,7 +72,7 @@ routes.allUsers = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const users = await userModel.find();
+    const users = await userModel.find().sort({ createdAt: -1 });
 
     const limit = 10;
     const totalPages = Math.ceil(users.length / limit);
@@ -100,6 +96,12 @@ routes.allUsers = async (req, res) => {
 routes.changeUserBalance = async (req, res) => {
   const { userId } = req.params;
   const { wallet } = req.body;
+
+  const { error } = adminValid.changeUserBalanceValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
   try {
     const user = userModel.findById(userId);
@@ -125,7 +127,7 @@ routes.allContacts = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const contacts = await contactModel.find();
+    const contacts = await contactModel.find().sort({ createdAt: -1 });
 
     const limit = 10;
     const totalPages = Math.ceil(contacts.length / limit);
@@ -178,7 +180,9 @@ routes.pastPackages = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const packages = await packageModel.find({ result: { $ne: "pending" } });
+    const packages = await packageModel
+      .find({ result: { $ne: "pending" } })
+      .sort({ createdAt: -1 });
 
     const limit = 10;
     const totalPages = Math.ceil(packages.length / limit);
@@ -269,11 +273,15 @@ routes.vslPackageById = async (req, res) => {
 routes.allOrders = async (req, res) => {
   const { page } = req.query;
   try {
+    // reverse order
     const orders = await orderHistoryModel
       .find()
       .populate("user")
       .populate("package")
-      .populate("vslPackage");
+      .populate("vslPackage")
+      .sort({ createdAt: -1 });
+
+    // orders.reverse();
 
     const limit = 10;
     const totalPages = Math.ceil(orders.length / limit);
@@ -319,10 +327,16 @@ routes.overview = async (req, res) => {
 };
 
 routes.addPackage = async (req, res) => {
-  try {
-    const { name, price, bets, description, gamePreview, endDate, videoURL } =
-      req.body;
+  const { name, price, bets, description, gamePreview, endDate, videoURL } =
+    req.body;
 
+  const { error } = adminValid.addPackageValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
     const newPackage = await packageModel.create({
       name,
       price,
@@ -352,20 +366,26 @@ routes.addPackage = async (req, res) => {
 };
 
 routes.addVslPackage = async (req, res) => {
-  try {
-    const {
-      name,
-      actPrice,
-      discountedPrice,
-      bets,
-      description,
-      gamePreview,
-      startDate,
-      endDate,
-      saleTitle,
-      videoURL,
-    } = req.body;
+  const {
+    name,
+    actPrice,
+    discountedPrice,
+    bets,
+    description,
+    gamePreview,
+    startDate,
+    endDate,
+    saleTitle,
+    videoURL,
+  } = req.body;
 
+  const { error } = adminValid.addVslPackageValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
     const newPackage = await vslPackageModel.create({
       name,
       actPrice,
@@ -401,6 +421,12 @@ routes.addVslPackage = async (req, res) => {
 routes.updatePackageStatus = async (req, res) => {
   const { id } = req.params;
   let { status, result } = req.body;
+
+  const { error } = adminValid.updatePackageStatusValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
   try {
     console.log(id, status, result);
@@ -473,7 +499,7 @@ routes.updatePackageStatus = async (req, res) => {
           user: userId,
           package: id,
           status: "inactive",
-          desc: "wallet credited",
+          desc: "Refund of " + orders[0].package.name + " package",
           price: orders[0].package.price,
         });
 
@@ -554,6 +580,16 @@ routes.updateVslPackageStatus = async (req, res) => {
   const { id } = req.params;
   let { status, result } = req.body;
 
+  const { error } = adminValid.updateVslPackageStatusValidation.validate(
+    req.body
+  );
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const package = await vslPackageModel.findOne({ _id: id });
+
   if (!package) {
     return res.status(404).json({ error: "package not found" });
   }
@@ -569,7 +605,7 @@ routes.updateVslPackageStatus = async (req, res) => {
   if (result === "lose") {
     //credit price to all users wallet who bought
     const orders = await orderHistoryModel
-      .find({ package: id })
+      .find({ vslPackage: id })
       .populate("user")
       .populate("vslPackage");
 
@@ -621,7 +657,7 @@ routes.updateVslPackageStatus = async (req, res) => {
         user: userId,
         vslPackage: id,
         status: "inactive",
-        desc: "wallet credited",
+        desc: "Refund of " + orders[0].vslPackage.name + " package",
         price: orders[0].vslPackage.discountedPrice,
       });
 
@@ -635,7 +671,7 @@ routes.updateVslPackageStatus = async (req, res) => {
 
   if (result !== "pending") status = "inactive";
 
-  const updatedPackage = await packageModel.findOneAndUpdate(
+  const updatedPackage = await vslPackageModel.findOneAndUpdate(
     { _id: id },
     { status, result },
     { new: true }
@@ -699,6 +735,12 @@ routes.updatePackage = async (req, res) => {
   const { name, price, bets, description, gamePreview, endDate, videoURL } =
     req.body;
   // const newBets = JSON.parse(bets);/
+
+  const { error } = adminValid.updatePackageValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
   try {
     const package = await packageModel.findById(id);
@@ -769,6 +811,12 @@ routes.updateVslPackage = async (req, res) => {
     saleTitle,
     videoURL,
   } = req.body;
+
+  const { error } = adminValid.updateVslPackageValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
   try {
     const package = await vslPackageModel.findOne({ _id: id });
@@ -939,7 +987,7 @@ routes.bulkPackageMail = async (req, res) => {
     const allActivePackages = await packageModel.find({ status: "active" });
 
     const data = allActivePackages.filter((item) => {
-      return new Date (item.endDate) > Date.now();
+      return new Date(item.endDate) > Date.now();
     });
 
     users.forEach(async (user) => {
@@ -953,7 +1001,7 @@ routes.bulkPackageMail = async (req, res) => {
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {
-    return res.status(500).json({ error: "internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 

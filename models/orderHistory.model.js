@@ -27,7 +27,7 @@ const orderHistorySchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: function(){return Date.now()},
   },
 });
 
