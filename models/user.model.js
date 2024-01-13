@@ -35,6 +35,15 @@ const user = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  status: {
+    type: String,
+    enum: ["active", "suspended", "deleted"],
+    default: "active",
+  },
+  remark: {
+    type: String,
+    default: "No issue Found",
+  },
   bonus: {
     type: Boolean,
     default: false,
@@ -59,7 +68,9 @@ const user = mongoose.Schema({
   ],
   createdAt: {
     type: Date,
-    default: function(){return Date.now()}
+    default: function () {
+      return Date.now();
+    },
   },
 });
 

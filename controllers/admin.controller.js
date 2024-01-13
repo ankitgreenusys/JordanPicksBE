@@ -983,7 +983,7 @@ routes.bulkPackageMail = async (req, res) => {
   // const { title, data } = req.body;
 
   try {
-    const users = await userModel.find({ isVerified: true });
+    const users = await userModel.find({ isVerified: true, status: "active" });
     const allActivePackages = await packageModel.find({ status: "active" });
 
     const data = allActivePackages.filter((item) => {
@@ -1005,5 +1005,45 @@ routes.bulkPackageMail = async (req, res) => {
   }
 };
 
+// /getUser/:id
+routes.getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await userModel.getUserById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+// /updateUserStatus/:id
+routes.updateUserStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status, remarks } = req.body;
+
+  try {
+    const user = await userModel.findOneAndUpdate(
+      { _id: id },
+      {
+        status,
+        remarks,
+      },
+      { new: true }
+    );
+
+    return res.status(201).json({ msg: "success", dta: user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+ 
 module.exports = routes;
 // export default routes;
