@@ -1026,14 +1026,14 @@ routes.getUserById = async (req, res) => {
 // /updateUserStatus/:id
 routes.updateUserStatus = async (req, res) => {
   const { id } = req.params;
-  const { status, remarks } = req.body;
+  const { status, remark } = req.body;
 
   try {
     const user = await userModel.findOneAndUpdate(
       { _id: id },
       {
         status,
-        remarks,
+        remark,
       },
       { new: true }
     );
