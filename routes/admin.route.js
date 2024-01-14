@@ -29,6 +29,7 @@ router.delete("/deleteVslPackage/:id", auth, controller.deleteVslPackage);
 router.get("/deletedPackages", auth, controller.deletedPackages);
 router.get("/deletedVslPackages", auth, controller.deletedVslPackages);
 router.get("/bulkPackageMail", auth, controller.bulkPackageMail);
+router.get("/bulkCustomMail", auth, controller.bulkCustomMail)
 router.get("/getUser/:id", controller.getUserById);
 router.patch("/updateUserStatus/:id", controller.updateUserStatus)
 router.get("/directupdate", controller.directupdate)

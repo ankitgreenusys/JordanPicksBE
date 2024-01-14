@@ -7,6 +7,7 @@ const vslPackageModel = require("../models/vslPackage.model");
 const userModel = require("../models/user.model");
 
 const sendAllPackage = require("../utils/sendAllPackageMsg.utils");
+const sendCustomMsg = require("../utils/sendCustomMsg.utils");
 
 const adminValid = require("../validations/admin.joi");
 const routes = {};
@@ -996,6 +997,27 @@ routes.bulkPackageMail = async (req, res) => {
         user.name,
         "Jordanspicks.com packages out NOW!",
         data
+      );
+    });
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+routes.bulkCustomMail = async (req, res) => {
+  const { data } = req.body;
+
+  try {
+    const users = await userModel.find({ isVerified: true, status: "active" });
+
+    users.forEach(async (user) => {
+      await sendCustomMsg(
+        user.email,
+        user.name,
+        data,
+        "Jordanspicks.com packages out NOW!"
       );
     });
 

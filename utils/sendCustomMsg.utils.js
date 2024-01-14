@@ -8,7 +8,7 @@ const emailtemplateotp = (name, data) => {
 </div>`;
 };
 
-const sendOTP = async (email, otp, title) => {
+const sendOTP = async (email, name, data, title) => {
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
@@ -25,7 +25,7 @@ const sendOTP = async (email, otp, title) => {
       from: process.env.MAIL_EMAIL,
       to: email,
       subject: title,
-      html: emailtemplateotp(otp),
+      html: emailtemplateotp(name, data),
     };
 
     const result = await transporter.sendMail(mailOptions);
