@@ -1005,7 +1005,6 @@ routes.bulkPackageMail = async (req, res) => {
   }
 };
 
-// /getUser/:id
 routes.getUserById = async (req, res) => {
   const { id } = req.params;
 
@@ -1023,7 +1022,6 @@ routes.getUserById = async (req, res) => {
   }
 };
 
-// /updateUserStatus/:id
 routes.updateUserStatus = async (req, res) => {
   const { id } = req.params;
   const { status, remark } = req.body;
@@ -1039,6 +1037,28 @@ routes.updateUserStatus = async (req, res) => {
     );
 
     return res.status(201).json({ msg: "success", dta: user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.directupdate = async (req, res) => {
+  try {
+    const allUsers = userModel.find();
+
+    allUsers.forEach(async (user) => {
+      await userModel.findOneAndUpdate(
+        {
+          _id: user._id,
+        },
+        {
+          status: "active",
+          remark: "No issue Found",
+        }
+      );
+    });
+    return res.status(201).json({ msg: "success" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

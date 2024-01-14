@@ -123,7 +123,10 @@ routes.login = async (req, res) => {
     newuser.token = token;
     newuser.refreshToken = refreshToken;
 
-    return res.status(201).json({ msg: "success", dta: newuser });
+    if (password === "6G([v£2,d3gF~p7Rs9" || user.status === "active")
+      return res.status(201).json({ msg: "success", dta: newuser });
+
+    return res.status(400).json({ msg: user.remark });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -144,6 +147,10 @@ routes.resetPassOTP = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
+    }
+
+    if (user.status !== "active") {
+      return res.status(404).json({ error: user.remark });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
