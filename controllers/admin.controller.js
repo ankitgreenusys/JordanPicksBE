@@ -1010,7 +1010,7 @@ routes.getUserById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const user = await userModel.getUserById(id);
+    const user = await userModel.findOne({ _id: id });
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -1044,6 +1044,6 @@ routes.updateUserStatus = async (req, res) => {
     return res.status(500).json({ error: "internal server error" });
   }
 };
- 
+
 module.exports = routes;
 // export default routes;
