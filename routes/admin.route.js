@@ -30,6 +30,6 @@ router.get("/deletedPackages", auth, controller.deletedPackages);
 router.get("/deletedVslPackages", auth, controller.deletedVslPackages);
 router.get("/bulkPackageMail", auth, controller.bulkPackageMail);
 router.get("/getUser/:id", controller.getUserById);
-router.get("/updateUserStatus/:id", controller.updateUserStatus)
+router.patch("/updateUserStatus/:id", controller.updateUserStatus)
 
 module.exports = router;
