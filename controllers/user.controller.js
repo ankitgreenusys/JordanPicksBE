@@ -495,11 +495,15 @@ routes.getTransactions = async (req, res) => {
 
     console.log(id);
 
-    const orderHistory = await userModel.findById(id).populate("orderHistory");
+    const orderHistory = await orderHistoryModel
+      .find({ user: id })
+      .populate("package")
+      .populate("vslPackage")
+      .sort({ createdAt: -1 });
 
     return res
       .status(200)
-      .json({ msg: "success", dta: orderHistory.orderHistory });
+      .json({ msg: "success", dta: orderHistory });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

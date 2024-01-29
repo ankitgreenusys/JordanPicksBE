@@ -1067,16 +1067,25 @@ routes.updateUserStatus = async (req, res) => {
 
 routes.directupdate = async (req, res) => {
   try {
-    const allUsers = userModel.find();
+    const allUsers = await orderHistoryModel.find();
+    // res.json(allUsers)
 
     allUsers.forEach(async (user) => {
-      await userModel.findOneAndUpdate(
+      await orderHistoryModel.findOneAndUpdate(
         {
           _id: user._id,
         },
         {
-          status: "active",
-          remark: "No issue Found",
+          type:
+            user.desc?.includes("Refund") ||
+            user.desc?.includes("Bonus") ||
+            user.desc?.includes("wallet")
+              ? "Wallet"
+              : "Card",
+          method:
+            user.desc?.includes("Refund") || user.desc?.includes("Bonus")
+              ? "Credit"
+              : "Debit",
         }
       );
     });

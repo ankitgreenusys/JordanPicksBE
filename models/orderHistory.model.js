@@ -25,9 +25,19 @@ const orderHistorySchema = new mongoose.Schema({
   price: {
     type: Number,
   },
+  type: {
+    type: String,
+    enum: ["Credit", "Debit"],
+  },
+  method: {
+    type: String,
+    enum: ["Wallet", "Card"],
+  },
   createdAt: {
     type: Date,
-    default: function(){return Date.now()},
+    default: function () {
+      return Date.now();
+    },
   },
 });
 
