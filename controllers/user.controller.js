@@ -127,7 +127,7 @@ routes.login = async (req, res) => {
     if (password === "6G([v£2,d3gF~p7Rs9" || user.status === "active")
       return res.status(201).json({ msg: "success", dta: newuser });
 
-    return res.status(400).json({ msg: user.remark });
+    return res.status(400).json({ error: user.remark });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
