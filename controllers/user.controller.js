@@ -5,6 +5,7 @@ const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const bcrypt = require("bcryptjs");
 const sendWelcomeMsg = require("../utils/sendWelcomeMsg.utils");
+const sendVerifyAccount = require("../utils/sendVerifyAccount.utils");
 const sendMsg = require("../utils/sendMsg.utils");
 const sendPayment = require("../utils/sendPayment.utils");
 const sendResetPassword = require("../utils/sendResetPassword.utils");
@@ -133,6 +134,76 @@ routes.login = async (req, res) => {
   }
 };
 
+routes.generateOTP = async (req, res) => {
+  try {
+    const id = req.userId;
+
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "email not found" });
+    }
+
+    if (user.status !== "active") {
+      return res.status(404).json({ error: user.remark });
+    }
+
+    if (user.isVerified) {
+      return res.status(404).json({ error: "User is verified" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    user.verificationCode = otp;
+    await user.save();
+
+    await sendVerifyAccount(
+      user.email,
+      user.name,
+      user.verificationCode,
+      "JordansPicks - Verify Account"
+    );
+
+    return res.status(201).json({ msg: "Email sent" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.verifyAccount = async (req, res) => {
+  try {
+    const id = req.userId;
+    const { otp } = req.body;
+
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "email not found" });
+    }
+
+    if (user.status !== "active") {
+      return res.status(404).json({ error: user.remark });
+    }
+
+    if (user.isVerified) {
+      return res.status(404).json({ error: "User is verified" });
+    }
+
+    if (user.verificationCode !== otp) {
+      return res.status(400).json({ error: "invalid otp" });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 routes.resetPassOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -151,6 +222,10 @@ routes.resetPassOTP = async (req, res) => {
 
     if (user.status !== "active") {
       return res.status(404).json({ error: user.remark });
+    }
+
+    if (!user.isVerified) {
+      return res.status(404).json({ error: "User is not verified" });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -243,7 +318,7 @@ routes.refreshAccessToken = async (req, res) => {
   if (!refreshToken)
     return res.status(401).send({ error: "Access denied, token missing!" });
 
-  console.log("refressh", refreshToken);
+  // console.log("refressh", refreshToken);
 
   try {
     const decoded = jwt.verify(
@@ -389,7 +464,11 @@ routes.getWallet = async (req, res) => {
 
     return res.status(200).json({
       msg: "success",
-      dta: { wallet: user.wallet, name: user.name },
+      dta: {
+        wallet: user.wallet,
+        name: user.name,
+        isVerified: user.isVerified,
+      },
     });
   } catch (error) {
     console.log(error);

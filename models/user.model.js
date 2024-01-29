@@ -20,7 +20,7 @@ const user = mongoose.Schema({
   },
   isVerified: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   verificationCode: {
     type: Number,
