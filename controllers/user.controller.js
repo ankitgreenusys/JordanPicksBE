@@ -66,7 +66,7 @@ routes.createUser = async (req, res) => {
     //   "JordansPicks - Claim your $25 bonus"
     // );
 
-    await sendMsg(
+    sendMsg(
       newuser.email,
       newuser.name,
       "JordansPicks - Welcome to JordansPicks"
@@ -378,6 +378,53 @@ routes.userDashboard = async (req, res) => {
   }
 };
 
+routes.getWallet = async (req, res) => {
+  try {
+    const id = req.userId;
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    return res.status(200).json({
+      msg: "success",
+      dta: { wallet: user.wallet, name: user.name },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.getMyPackages = async (req, res) => {
+  try {
+    const id = req.userId;
+
+    const packages = userModel.findById(id).populate("package").package;
+
+    return res.status(200).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.getTransactions = async (req, res) => {
+  try {
+    const id = req.userId;
+
+    const orderHistory = userModel
+      .findById(id)
+      .populate("orderHistory").orderHistory;
+
+    return res.status(200).json({ msg: "success", dta: orderHistory });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 routes.updateProfile = async (req, res) => {
   const id = req.userId;
 
@@ -614,7 +661,7 @@ routes.validPaymentPackage = async (req, res) => {
       user.orderHistory.push(order._id);
 
       await user.save();
-      await sendPayment(
+      sendPayment(
         user.email,
         user.name,
         package.name,
@@ -755,7 +802,7 @@ routes.validPaymentVslPackage = async (req, res) => {
       user.orderHistory.push(order._id);
 
       await user.save();
-      await sendPayment(
+      sendPayment(
         user.email,
         user.name,
         package.name,
@@ -820,7 +867,7 @@ routes.walletWithdrawPackage = async (req, res) => {
 
     await user.save();
 
-    await sendPayment(
+    sendPayment(
       user.email,
       user.name,
       package.name,
@@ -883,7 +930,7 @@ routes.walletWithdrawVslPackage = async (req, res) => {
 
     await user.save();
 
-    await sendPayment(
+    sendPayment(
       user.email,
       user.name,
       package.name,
