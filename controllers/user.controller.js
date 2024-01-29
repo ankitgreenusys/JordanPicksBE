@@ -480,7 +480,7 @@ routes.getMyPackages = async (req, res) => {
   try {
     const id = req.userId;
 
-    const packages = userModel.findById(id).populate("package").package;
+    const packages = await userModel.findById(id).populate("package").package;
 
     return res.status(200).json({ msg: "success", dta: packages });
   } catch (error) {
@@ -493,7 +493,7 @@ routes.getTransactions = async (req, res) => {
   try {
     const id = req.userId;
 
-    const orderHistory = userModel
+    const orderHistory = await userModel
       .findById(id)
       .populate("orderHistory").orderHistory;
 
