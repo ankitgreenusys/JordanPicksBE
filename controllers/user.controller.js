@@ -480,9 +480,9 @@ routes.getMyPackages = async (req, res) => {
   try {
     const id = req.userId;
 
-    const packages = await userModel.findById(id).populate("package").package;
+    const packages = await userModel.findById(id).populate("package");
 
-    return res.status(200).json({ msg: "success", dta: packages });
+    return res.status(200).json({ msg: "success", dta: packages.package });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -493,11 +493,13 @@ routes.getTransactions = async (req, res) => {
   try {
     const id = req.userId;
 
-    const orderHistory = await userModel
-      .findById(id)
-      .populate("orderHistory").orderHistory;
+    console.log(id);
 
-    return res.status(200).json({ msg: "success", dta: orderHistory });
+    const orderHistory = await userModel.findById(id).populate("orderHistory");
+
+    return res
+      .status(200)
+      .json({ msg: "success", dta: orderHistory.orderHistory });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
