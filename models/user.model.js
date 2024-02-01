@@ -15,7 +15,8 @@ const user = mongoose.Schema({
   },
   username: {
     type: String,
-    unique: true,
+    default: "",
+    // unique: true,
   },
   isVerified: {
     type: Boolean,
