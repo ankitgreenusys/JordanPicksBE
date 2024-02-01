@@ -29,10 +29,10 @@ routes.createUser = async (req, res) => {
       return res.status(400).json({ error: "email already exists" });
     }
 
-    const ifusername = await userModel.findOne({ username });
-    if (ifusername) {
-      return res.status(400).json({ error: "username already exists" });
-    }
+    // const ifusername = await userModel.findOne({ username });
+    // if (ifusername) {
+    //   return res.status(400).json({ error: "username already exists" });
+    // }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
