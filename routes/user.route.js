@@ -10,8 +10,8 @@ router.post("/signup", userController.createUser);
 router.post("/refreshtoken", userController.refreshAccessToken);
 router.get("/getBonus", auth, userController.getBonus);
 router.post("/login", userController.login);
-router.get("/generateOTP", userController.generateOTP);
-router.post("/verifyAccount",userController.verifyAccount);
+router.get("/generateOTP", auth, userController.generateOTP);
+router.post("/verifyAccount", auth, userController.verifyAccount);
 router.post("/resetPassOTP", userController.resetPassOTP);
 router.post("/resetPass", userController.resetpassword);
 router.get("/allPackage", userController.allActivePackages);
@@ -19,14 +19,30 @@ router.get("/getPackage/:id", auth, userController.getPackage);
 router.get("/getVslPackage/:id", auth, userController.getVslPackage);
 router.post("/contact", userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
-router.get("/getProfileShort",auth, userController.getWallet);
-router.get("/getMyPackages",auth, userController.getMyPackages);
+router.get("/getProfileShort", auth, userController.getWallet);
+router.get("/getMyPackages", auth, userController.getMyPackages);
 router.get("/getTransactions", auth, userController.getTransactions);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
-router.post("/validatePaymentPackage", auth, userController.validPaymentPackage);
+router.post(
+  "/validatePaymentPackage",
+  auth,
+  userController.validPaymentPackage
+);
 router.post("/createIntentVslPackage", auth, userController.buyVslPackage);
-router.post("/validatePaymentVslPackage", auth, userController.validPaymentVslPackage);
-router.post("/walletWithdrawPackage", auth, userController.walletWithdrawPackage);
-router.post("/walletWithdrawVslPackage", auth, userController.walletWithdrawVslPackage);
+router.post(
+  "/validatePaymentVslPackage",
+  auth,
+  userController.validPaymentVslPackage
+);
+router.post(
+  "/walletWithdrawPackage",
+  auth,
+  userController.walletWithdrawPackage
+);
+router.post(
+  "/walletWithdrawVslPackage",
+  auth,
+  userController.walletWithdrawVslPackage
+);
 module.exports = router;

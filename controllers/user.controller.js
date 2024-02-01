@@ -42,7 +42,7 @@ routes.createUser = async (req, res) => {
       email,
       mobile,
       password: hashedPassword,
-      username,
+      // username,
       wallet: 25,
       bonus: true,
     });
