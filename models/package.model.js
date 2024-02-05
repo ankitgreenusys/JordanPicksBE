@@ -13,6 +13,10 @@ const packageSchema = new mongoose.Schema({
   //   type: Date,
   //   required: true,
   // },
+  sports: {
+    type: String,
+    default: "Others",
+  },
   endDate: {
     type: Date,
     required: true,
@@ -55,7 +59,9 @@ const packageSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: function(){return Date.now()}
+    default: function () {
+      return Date.now();
+    },
   },
 });
 
