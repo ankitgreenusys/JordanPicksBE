@@ -862,13 +862,13 @@ routes.deletePackage = async (req, res) => {
       return res.status(404).json({ error: "package not found" });
     }
 
-    if (package.status === "active") {
-      return res.status(404).json({ error: "package is active" });
-    }
+    // if (package.status === "active") {
+    //   return res.status(404).json({ error: "package is active" });
+    // }
 
-    if (package.result === "pending") {
-      return res.status(404).json({ error: "package is pending" });
-    }
+    // if (package.result === "pending") {
+    //   return res.status(404).json({ error: "package is pending" });
+    // }
 
     await packageModel.findOneAndUpdate(
       { _id: id },
