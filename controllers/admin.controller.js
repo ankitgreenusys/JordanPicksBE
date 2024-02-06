@@ -78,7 +78,7 @@ routes.allUsers = async (req, res) => {
 
     if (name)
       users = allusers.filter((user) =>
-        user.name.nametoLowerCase().includes(name.toLowerCase())
+        user.name.toLowerCase().includes(name.toLowerCase())
       );
     if (mobile)
       users = allusers.filter((user) =>
@@ -172,7 +172,7 @@ routes.allPackages = async (req, res) => {
   try {
     const packages = await packageModel.find({
       result: "pending",
-      // isDeleted: false,
+      isDeleted: false,
     });
 
     const limit = 10;
