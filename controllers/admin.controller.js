@@ -70,10 +70,25 @@ routes.login = async (req, res) => {
 
 routes.allUsers = async (req, res) => {
   //apply pagination
-  const { page } = req.query;
+  const { page, name, mobile, email } = req.query;
 
   try {
-    const users = await userModel.find().sort({ createdAt: -1 });
+    const allusers = await userModel.find().sort({ createdAt: -1 });
+    let users = [];
+
+    if (name)
+      users = allusers.filter((user) =>
+        user.name.nametoLowerCase().includes(name.toLowerCase())
+      );
+    if (mobile)
+      users = allusers.filter((user) =>
+        user.mobile.toString().includes(mobile)
+      );
+
+    if (email)
+      users = users.filter((user) =>
+        user.email.toLowerCase().includes(email.toLowerCase())
+      );
 
     const limit = 10;
     const totalPages = Math.ceil(users.length / limit);
