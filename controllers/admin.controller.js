@@ -92,7 +92,7 @@ routes.allUsers = async (req, res) => {
 
     if (!name && !mobile && !email) users = allusers;
 
-    const limit = 10;
+    const limit = 10; 
     const totalPages = Math.ceil(users.length / limit);
 
     const startIndex = (page - 1) * limit;
