@@ -90,6 +90,8 @@ routes.allUsers = async (req, res) => {
         user.email.toLowerCase().includes(email.toLowerCase())
       );
 
+    if (!name && !mobile && !email) users = allusers;
+
     const limit = 10;
     const totalPages = Math.ceil(users.length / limit);
 
