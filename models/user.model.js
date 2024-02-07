@@ -66,6 +66,10 @@ const user = mongoose.Schema({
       ref: "orderHistory",
     },
   ],
+  boughtSpecialPackage: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: function () {

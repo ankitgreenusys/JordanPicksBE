@@ -5,6 +5,7 @@ const orderHistoryModel = require("../models/orderHistory.model");
 const packageModel = require("../models/package.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const userModel = require("../models/user.model");
+const storeModel = require("../models/store.model");
 
 const sendAllPackage = require("../utils/sendAllPackageMsg.utils");
 const sendCustomMsg = require("../utils/sendCustomMsg.utils");
@@ -92,7 +93,7 @@ routes.allUsers = async (req, res) => {
 
     if (!name && !mobile && !email) users = allusers;
 
-    const limit = 10; 
+    const limit = 10;
     const totalPages = Math.ceil(users.length / limit);
 
     const startIndex = (page - 1) * limit;
@@ -182,6 +183,33 @@ routes.allPackages = async (req, res) => {
     const endIndex = page * limit;
 
     const result = packages.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.allStores = async (req, res) => {
+  const { page } = req.query;
+
+  try {
+    const store = await storeModel.find({
+      isDeleted: false,
+    });
+
+    const limit = 10;
+    const totalPages = Math.ceil(store.length / limit);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = store.slice(startIndex, endIndex);
 
     return res.status(201).json({
       msg: "success",
@@ -345,8 +373,16 @@ routes.overview = async (req, res) => {
 };
 
 routes.addPackage = async (req, res) => {
-  const { name, price, bets, description, gamePreview, endDate, videoURL } =
-    req.body;
+  const {
+    name,
+    price,
+    bets,
+    description,
+    gamePreview,
+    endDate,
+    videoURL,
+    sports,
+  } = req.body;
 
   const { error } = adminValid.addPackageValidation.validate(req.body);
 
@@ -363,20 +399,29 @@ routes.addPackage = async (req, res) => {
       gamePreview,
       bets,
       videoURL,
+      sports,
     });
 
-    // bets.forEach(async (bet) => {
-    //   const newBet = await betModel.create({
-    //     title: bet,
-    //   });
-    //   await packageModel.findOneAndUpdate(
-    //     { _id: newPackage._id },
-    //     { $push: { bets: newBet._id } },
-    //     { new: true }
-    //   );
-    // });
-
     return res.status(201).json({ msg: "success", dta: newPackage });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.addStore = async (req, res) => {
+  const { name, price, credits } = req.body;
+
+  const { error } = adminValid.addStoreValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
+    const newStore = await storeModel.create({ name, price, credits });
+
+    return res.status(201).json({ msg: "success", dta: newStore });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -750,8 +795,16 @@ routes.getVslPackagePageCount = async (req, res) => {
 
 routes.updatePackage = async (req, res) => {
   const { id } = req.params;
-  const { name, price, bets, description, gamePreview, endDate, videoURL } =
-    req.body;
+  const {
+    name,
+    price,
+    bets,
+    description,
+    gamePreview,
+    endDate,
+    videoURL,
+    sports,
+  } = req.body;
   // const newBets = JSON.parse(bets);/
 
   const { error } = adminValid.updatePackageValidation.validate(req.body);
@@ -776,39 +829,45 @@ routes.updatePackage = async (req, res) => {
         gamePreview,
         bets,
         videoURL,
+        sports,
       },
       { new: true }
     );
 
-    // console.log(newBets,"newBets");
-
-    // bets.forEach(async (bet) => {
-    //   if (bet.action === "add") {
-    //     const newBet = await betModel.create({
-    //       title: bet.title,
-    //     });
-    //     await packageModel.findOneAndUpdate(
-    //       { _id: updatedPackage._id },
-    //       { $push: { bets: newBet._id } },
-    //       { new: true }
-    //     );
-    //   } else if (bet.action === "update") {
-    //     await betModel.findOneAndUpdate(
-    //       { _id: bet._id },
-    //       { title: bet.title },
-    //       { new: true }
-    //     );
-    //   } else if (bet.action === "delete") {
-    //     await betModel.findOneAndDelete({ _id: bet._id });
-    //     await packageModel.findOneAndUpdate(
-    //       { _id: updatedPackage._id },
-    //       { $pull: { bets: bet._id } },
-    //       { new: true }
-    //     );
-    //   }
-    // });
-
     return res.status(201).json({ msg: "success", dta: updatedPackage });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.updateStore = async (req, res) => {
+  const { id } = req.params;
+  const { name, price, credits } = req.body;
+
+  const { error } = adminValid.addStoreValidation.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  try {
+    const store = await storeModel.findById(id);
+    if (!store) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    const updateStore = await storeModel.findOneAndUpdate(
+      { _id: id },
+      {
+        name,
+        price,
+        credits,
+      },
+      { new: true }
+    );
+
+    return res.status(201).json({ msg: "success", dta: updateStore });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -894,6 +953,28 @@ routes.deletePackage = async (req, res) => {
     );
 
     return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.deleteStore = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const store = await storeModel.findById(id);
+    if (!store) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    const updateStore = await storeModel.findOneAndUpdate(
+      { _id: id },
+      { isDeleted: true },
+      { new: true }
+    );
+
+    return res.status(201).json({ msg: "success", dta: updateStore });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

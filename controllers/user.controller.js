@@ -468,6 +468,7 @@ routes.getWallet = async (req, res) => {
         wallet: user.wallet,
         name: user.name,
         isVerified: user.isVerified,
+        boughtSpecialPackage: user.boughtSpecialPackage,
       },
     });
   } catch (error) {
@@ -501,9 +502,7 @@ routes.getTransactions = async (req, res) => {
       .populate("vslPackage")
       .sort({ createdAt: -1 });
 
-    return res
-      .status(200)
-      .json({ msg: "success", dta: orderHistory });
+    return res.status(200).json({ msg: "success", dta: orderHistory });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
