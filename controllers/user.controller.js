@@ -136,9 +136,10 @@ routes.login = async (req, res) => {
 
 routes.generateOTP = async (req, res) => {
   try {
-    const id = req.userId;
+    // const id = req.userId;
+    const email = req.body.email;
 
-    const user = await userModel.findById(id);
+    const user = await userModel.findById({ email });
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -173,10 +174,9 @@ routes.generateOTP = async (req, res) => {
 
 routes.verifyAccount = async (req, res) => {
   try {
-    const id = req.userId;
-    const { otp } = req.body;
+    const { email, otp } = req.body;
 
-    const user = await userModel.findById(id);
+    const user = await userModel.findById({ email });
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -348,6 +348,33 @@ routes.allActivePackages = async (req, res) => {
   try {
     const packages = await packageModel.find({ status: "active" });
     return res.status(201).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.allStores = async (req, res) => {
+  const { page } = req.query;
+
+  try {
+    const store = await storeModel.find({
+      isDeleted: false,
+    });
+
+    const limit = 10;
+    const totalPages = Math.ceil(store.length / limit);
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = store.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
