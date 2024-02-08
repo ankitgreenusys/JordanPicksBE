@@ -16,6 +16,7 @@ router.post("/resetPassOTP", userController.resetPassOTP);
 router.post("/resetPass", userController.resetpassword);
 router.get("/allPackage", userController.allActivePackages);
 router.get("/getStore", auth, userController.allStores);
+router.get("/getstore/:id", auth, controller.storesById);
 router.get("/getPackage/:id", auth, userController.getPackage);
 router.get("/getVslPackage/:id", auth, userController.getVslPackage);
 router.post("/contact", userController.contactUs);

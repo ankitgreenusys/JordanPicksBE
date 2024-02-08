@@ -222,6 +222,23 @@ routes.allStores = async (req, res) => {
   }
 };
 
+routes.storesById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const store = await storeModel.findOne({ _id: id });
+
+    if (!store) {
+      return res.status(404).json({ error: "store not found" });
+    }
+
+    return res.status(201).json({ msg: "success", dta: store });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 routes.pastPackages = async (req, res) => {
   const { page } = req.query;
 
