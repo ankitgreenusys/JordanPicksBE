@@ -1171,7 +1171,7 @@ routes.directupdate = async (req, res) => {
     allUsers.forEach(async (user) => {
       await userModel.findByIdAndUpdate(
         user._id,
-        { isVerified: false },
+        { username: user._id },
         { new: true }
       );
     });

@@ -16,7 +16,7 @@ const routes = {};
 
 routes.createUser = async (req, res) => {
   try {
-    const { name, email, mobile, password, username } = req.body;
+    const { name, email, mobile, password } = req.body;
 
     const { error } = userValid.createUserValidation.validate(req.body);
 
