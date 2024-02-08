@@ -10,7 +10,7 @@ router.post("/signup", userController.createUser);
 router.post("/refreshtoken", userController.refreshAccessToken);
 router.get("/getBonus", auth, userController.getBonus);
 router.post("/login", userController.login);
-router.get("/generateOTP", auth, userController.generateOTP);
+router.post("/generateOTP", auth, userController.generateOTP);
 router.post("/verifyAccount", auth, userController.verifyAccount);
 router.post("/resetPassOTP", userController.resetPassOTP);
 router.post("/resetPass", userController.resetpassword);
