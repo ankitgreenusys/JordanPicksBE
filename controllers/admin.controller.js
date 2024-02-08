@@ -1165,26 +1165,14 @@ routes.updateUserStatus = async (req, res) => {
 
 routes.directupdate = async (req, res) => {
   try {
-    const allUsers = await orderHistoryModel.find();
+    const allUsers = await userModel.find();
     // res.json(allUsers)
 
     allUsers.forEach(async (user) => {
-      await orderHistoryModel.findOneAndUpdate(
-        {
-          _id: user._id,
-        },
-        {
-          type:
-            user.desc?.includes("Refund") ||
-            user.desc?.includes("Bonus") ||
-            user.desc?.includes("wallet")
-              ? "Wallet"
-              : "Card",
-          method:
-            user.desc?.includes("Refund") || user.desc?.includes("Bonus")
-              ? "Credit"
-              : "Debit",
-        }
+      await userModel.findByIdAndUpdate(
+        user._id,
+        { isVerified: false },
+        { new: true }
       );
     });
     return res.status(201).json({ msg: "success" });
