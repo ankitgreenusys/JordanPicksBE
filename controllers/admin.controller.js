@@ -399,6 +399,7 @@ routes.addPackage = async (req, res) => {
     endDate,
     videoURL,
     sports,
+    category,
   } = req.body;
 
   const { error } = adminValid.addPackageValidation.validate(req.body);
@@ -417,6 +418,7 @@ routes.addPackage = async (req, res) => {
       bets,
       videoURL,
       sports,
+      category,
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -821,6 +823,7 @@ routes.updatePackage = async (req, res) => {
     endDate,
     videoURL,
     sports,
+    category
   } = req.body;
   // const newBets = JSON.parse(bets);/
 
@@ -847,6 +850,7 @@ routes.updatePackage = async (req, res) => {
         bets,
         videoURL,
         sports,
+        category
       },
       { new: true }
     );

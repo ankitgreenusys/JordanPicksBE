@@ -23,7 +23,8 @@ const addPackageValidation = Joi.object({
   gamePreview: Joi.string().required(),
   endDate: Joi.string().required(),
   videoURL: Joi.string().uri().required(),
-  string: Joi.string(),
+  sports: Joi.string().required(),
+  category: Joi.string().required(),
 });
 
 const addStoreValidation = Joi.object({
@@ -62,9 +63,9 @@ const updatePackageValidation = Joi.object({
   description: Joi.string().required(),
   gamePreview: Joi.string().required(),
   endDate: Joi.string().required(),
-  // url
   videoURL: Joi.string().uri().required(),
-  string: Joi.string(),
+  sports: Joi.string().required(),
+  category: Joi.string().required(),
 });
 
 const updateVslPackageValidation = Joi.object({
