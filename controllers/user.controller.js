@@ -189,7 +189,6 @@ routes.verifyAccount = async (req, res) => {
 
       const order = await orderHistoryModel.create({
         user: user._id,
-        package: null,
         status: "active",
         desc: `Verification Bonus`,
         price: 5,
@@ -203,7 +202,6 @@ routes.verifyAccount = async (req, res) => {
 
       const order = await orderHistoryModel.create({
         user: user._id,
-        package: null,
         status: "active",
         desc: `Signup Bonus`,
         price: 25,
