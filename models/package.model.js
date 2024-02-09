@@ -17,6 +17,10 @@ const packageSchema = new mongoose.Schema({
     type: String,
     default: "Others",
   },
+  category: {
+    type: String,
+    default: "Others",
+  },
   endDate: {
     type: Date,
     required: true,
