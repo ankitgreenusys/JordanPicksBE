@@ -5,12 +5,12 @@ const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const storeModel = require("../models/store.model");
 
-const bcrypt = require("bcryptjs");
-const sendWelcomeMsg = require("../utils/sendWelcomeMsg.utils");
 const sendVerifyAccount = require("../utils/sendVerifyAccount.utils");
 const sendMsg = require("../utils/sendMsg.utils");
 const sendPayment = require("../utils/sendPayment.utils");
 const sendResetPassword = require("../utils/sendResetPassword.utils");
+
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userValid = require("../validations/user.joi");
 
@@ -1095,6 +1095,108 @@ routes.walletWithdrawVslPackage = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.buyStore = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  try {
+    const { storeId } = req.body;
+    const id = req.userId;
+
+    const user = await userModel.findById(id);
+    const store = await storeModel.findById(storeId);
+
+    console.log(store);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!store) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    const amount = store.price;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      description: package.name,
+      shipping: {
+        name: user.name,
+        address: {
+          line1: "510 Townsend St",
+          postal_code: "98140",
+          city: "San Francisco",
+          state: "CA",
+          country: "US",
+        },
+      },
+      amount: (amount * 100).toFixed(0),
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+
+    console.log(paymentIntent);
+
+    return res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.validPaymentStore = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { paymentIntentId, storeId } = req.body;
+  const id = req.userId;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    console.log(paymentIntent);
+
+    if (paymentIntent.status === "succeeded") {
+      const store = await storeModel.findById(storeId);
+      const user = await userModel.findById(id);
+
+      if (!user) {
+        return res.status(404).json({ error: "user not found" });
+      }
+      if (!store) {
+        return res.status(404).json({ error: "Item not found" });
+      }
+
+      const order = await orderHistoryModel.create({
+        user: id,
+        package: storeId,
+        status: "active",
+        desc: `Store - ${store.name} purchased`,
+        price: store.price,
+        type: "Debit",
+        method: "Card",
+      });
+
+      user.store.push(package._id);
+      user.orderHistory.push(order._id);
+
+      await user.save();
+      sendPayment(
+        user.email,
+        user.name,
+        store.name,
+        store.price,
+        order.createdAt,
+        "JordansPicks - Payment Confirmation"
+      );
+    }
+
+    return res.send({
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ status: "Failed" });
   }
 };
 

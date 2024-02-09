@@ -47,4 +47,7 @@ router.post(
   auth,
   userController.walletWithdrawVslPackage
 );
+router.post("/createIntentStore", auth, userController.buyStore);
+router.post("/validatePaymentStore", auth, userController.validPaymentStore);
+
 module.exports = router;
