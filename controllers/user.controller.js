@@ -45,21 +45,9 @@ routes.createUser = async (req, res) => {
       mobile,
       password: hashedPassword,
       // username,
-      wallet: 25,
+      wallet: 0,
       bonus: true,
     });
-
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    const refreshToken = jwt.sign(
-      { id: newUser._id },
-      process.env.REFRESH_TOKEN_PRIVATE_KEY,
-      {
-        expiresIn: "1y",
-      }
-    );
 
     const newuser = newUser.toObject();
 
@@ -74,9 +62,6 @@ routes.createUser = async (req, res) => {
       newuser.name,
       "JordansPicks - Welcome to JordansPicks"
     );
-
-    newuser.token = token;
-    newuser.refreshToken = refreshToken;
 
     return res
       .status(201)
@@ -142,7 +127,7 @@ routes.generateOTP = async (req, res) => {
     const { email } = req.body;
 
     const user = await userModel.findOne({ email });
-    console.log(user)
+    console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -197,6 +182,36 @@ routes.verifyAccount = async (req, res) => {
 
     if (user.verificationCode != otp) {
       return res.status(400).json({ error: "invalid otp" });
+    }
+
+    if (user.createdAt < 1707459767643) {
+      user.wallet += 5;
+
+      const order = await orderHistoryModel.create({
+        user: user._id,
+        package: null,
+        status: "active",
+        desc: `Verification Bonus`,
+        price: 5,
+        type: "Credit",
+        method: "Wallet",
+      });
+
+      user.orderHistory.push(order._id);
+    } else {
+      user.wallet += 25;
+
+      const order = await orderHistoryModel.create({
+        user: user._id,
+        package: null,
+        status: "active",
+        desc: `Signup Bonus`,
+        price: 25,
+        type: "Credit",
+        method: "Wallet",
+      });
+
+      user.orderHistory.push(order._id);
     }
 
     user.isVerified = true;
@@ -776,6 +791,8 @@ routes.validPaymentPackage = async (req, res) => {
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
         price: cardDeduction,
+        type: "Debit",
+        method: "Card",
       });
 
       if (walletDeduction > 0) {
@@ -785,6 +802,8 @@ routes.validPaymentPackage = async (req, res) => {
           status: "active",
           desc: `Package - ${package.name} purchased (wallet)`,
           price: walletDeduction,
+          type: "Debit",
+          method: "Wallet",
         });
         user.orderHistory.push(walletOrder._id);
         user.wallet = user.wallet - walletDeduction;
