@@ -3,6 +3,8 @@ const orderHistoryModel = require("../models/orderHistory.model");
 const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
+const storeModel = require("../models/store.model");
+
 const bcrypt = require("bcryptjs");
 const sendWelcomeMsg = require("../utils/sendWelcomeMsg.utils");
 const sendVerifyAccount = require("../utils/sendVerifyAccount.utils");
@@ -140,7 +142,7 @@ routes.generateOTP = async (req, res) => {
     const { email } = req.body;
 
     const user = await userModel.findOne({ email });
-    // console.log(user)
+    console.log(user)
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -159,7 +161,7 @@ routes.generateOTP = async (req, res) => {
     user.verificationCode = otp;
     await user.save();
 
-    console.log(otp)
+    console.log(otp);
 
     await sendVerifyAccount(
       user.email,
@@ -388,7 +390,7 @@ routes.storesById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const store = await storeModel.findOne({ _id: id });
+    const store = await storeModel.findById(id);
 
     if (!store) {
       return res.status(404).json({ error: "store not found" });

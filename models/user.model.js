@@ -52,6 +52,12 @@ const user = mongoose.Schema({
       ref: "package",
     },
   ],
+  store: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "store",
+    },
+  ],
   vslPackage: [
     {
       type: mongoose.Schema.Types.ObjectId,
