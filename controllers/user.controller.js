@@ -387,7 +387,7 @@ routes.allStores = async (req, res) => {
 };
 
 routes.storesById = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.id;
 
   try {
     const store = await storeModel.findById(id);
