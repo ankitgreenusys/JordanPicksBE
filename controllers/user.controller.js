@@ -1010,6 +1010,8 @@ routes.walletWithdrawPackage = async (req, res) => {
       status: "active",
       desc: `Package - ${package.name} purchased (wallet)`,
       price: package.price,
+      type: "Debit",
+      method: "Wallet",
     });
 
     user.orderHistory.push(newOrder._id);
