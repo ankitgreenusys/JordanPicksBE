@@ -137,9 +137,10 @@ routes.login = async (req, res) => {
 routes.generateOTP = async (req, res) => {
   try {
     // const id = req.userId;
-    const email = req.body.email;
+    const { email } = req.body;
 
-    const user = await userModel.findById({ email });
+    const user = await userModel.findOne({ email });
+    // console.log(user)
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -157,6 +158,8 @@ routes.generateOTP = async (req, res) => {
 
     user.verificationCode = otp;
     await user.save();
+
+    console.log(otp)
 
     await sendVerifyAccount(
       user.email,
@@ -176,7 +179,7 @@ routes.verifyAccount = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await userModel.findById({ email });
+    const user = await userModel.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -187,10 +190,10 @@ routes.verifyAccount = async (req, res) => {
     }
 
     if (user.isVerified) {
-      return res.status(404).json({ error: "User is verified" });
+      return res.status(404).json({ error: "User is already verified" });
     }
 
-    if (user.verificationCode !== otp) {
+    if (user.verificationCode != otp) {
       return res.status(400).json({ error: "invalid otp" });
     }
 
