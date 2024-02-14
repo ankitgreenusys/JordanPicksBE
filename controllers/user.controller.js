@@ -184,7 +184,7 @@ routes.verifyAccount = async (req, res) => {
       return res.status(400).json({ error: "invalid otp" });
     }
 
-    if (user.createdAt < 1707459767643) {
+    if (user.createdAt < 1707913728091) {
       user.wallet += 5;
 
       const order = await orderHistoryModel.create({
