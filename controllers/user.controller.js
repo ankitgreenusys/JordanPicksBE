@@ -364,7 +364,9 @@ routes.refreshAccessToken = async (req, res) => {
 
 routes.allActivePackages = async (req, res) => {
   try {
-    const packages = await packageModel.find({ status: "active" });
+    const packages = await packageModel
+      .find({ status: "active" })
+      .select("-bets");
     return res.status(201).json({ msg: "success", dta: packages });
   } catch (error) {
     console.log(error);
@@ -540,12 +542,26 @@ routes.getWallet = async (req, res) => {
 };
 
 routes.getMyPackages = async (req, res) => {
+  const { page = 1 } = req.query;
+
   try {
     const id = req.userId;
 
-    const packages = await userModel.findById(id).populate("package");
+    const package = await userModel.findById(id).populate("package");
+    const packages = package.package;
+    const limit = 10;
+    const totalPages = Math.ceil(packages.length / limit);
 
-    return res.status(200).json({ msg: "success", dta: packages.package });
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const result = packages.slice(startIndex, endIndex);
+
+    return res.status(201).json({
+      msg: "success",
+      totalPages,
+      dta: result,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -553,18 +569,28 @@ routes.getMyPackages = async (req, res) => {
 };
 
 routes.getTransactions = async (req, res) => {
+  const { page = 1 } = req.query;
+
   try {
     const id = req.userId;
 
     console.log(id);
 
+    const totalOrders = await orderHistoryModel.countDocuments({ user: id });
+
     const orderHistory = await orderHistoryModel
       .find({ user: id })
       .populate("package")
       .populate("vslPackage")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * 10)
+      .limit(10);
 
-    return res.status(200).json({ msg: "success", dta: orderHistory });
+    const totalPages = Math.ceil(totalOrders / 10);
+
+    return res
+      .status(200)
+      .json({ msg: "success", totalPages, dta: orderHistory });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -633,6 +659,7 @@ routes.getPackage = async (req, res) => {
     });
     let isBought = false;
     if (isBuied) isBought = true;
+    else package.bets = [];
 
     console.log(isBuied);
 
@@ -1102,6 +1129,7 @@ routes.buyStore = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   try {
     const { storeId } = req.body;
+    console.log(req.body);
     const id = req.userId;
 
     const user = await userModel.findById(id);
@@ -1119,7 +1147,7 @@ routes.buyStore = async (req, res) => {
     const amount = store.price;
 
     const paymentIntent = await stripe.paymentIntents.create({
-      description: package.name,
+      description: store.name,
       shipping: {
         name: user.name,
         address: {
@@ -1177,7 +1205,7 @@ routes.validPaymentStore = async (req, res) => {
         method: "Card",
       });
 
-      user.store.push(package._id);
+      user.store.push(store._id);
       user.orderHistory.push(order._id);
 
       await user.save();

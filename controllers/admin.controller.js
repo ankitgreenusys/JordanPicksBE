@@ -71,7 +71,7 @@ routes.login = async (req, res) => {
 
 routes.allUsers = async (req, res) => {
   //apply pagination
-  const { page, name, mobile, email } = req.query;
+  const { page = 1, name, mobile, email, sortBy } = req.query;
 
   try {
     const allusers = await userModel.find().sort({ createdAt: -1 });
@@ -93,6 +93,16 @@ routes.allUsers = async (req, res) => {
 
     if (!name && !mobile && !email) users = allusers;
 
+    console.log(users);
+
+    if (sortBy) {
+      if (sortBy === "asc") {
+        users.sort((a, b) => a.package.length - b.package.length);
+      } else if (sortBy === "desc") {
+        users.sort((a, b) => b.package.length - a.package.length);
+      }
+    }
+
     const limit = 10;
     const totalPages = Math.ceil(users.length / limit);
 
@@ -100,6 +110,7 @@ routes.allUsers = async (req, res) => {
     const endIndex = page * limit;
 
     const result = users.slice(startIndex, endIndex);
+    console.log(result);
 
     return res.status(201).json({
       msg: "success",
@@ -823,7 +834,7 @@ routes.updatePackage = async (req, res) => {
     endDate,
     videoURL,
     sports,
-    category
+    category,
   } = req.body;
   // const newBets = JSON.parse(bets);/
 
@@ -850,7 +861,7 @@ routes.updatePackage = async (req, res) => {
         bets,
         videoURL,
         sports,
-        category
+        category,
       },
       { new: true }
     );
