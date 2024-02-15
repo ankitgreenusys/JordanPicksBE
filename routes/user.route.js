@@ -28,7 +28,6 @@ router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
 router.post(
   "/validatePaymentPackage",
-  auth,
   userController.validPaymentPackage
 );
 router.post("/createIntentVslPackage", auth, userController.buyVslPackage);
@@ -48,6 +47,6 @@ router.post(
   userController.walletWithdrawVslPackage
 );
 router.post("/createIntentStore", auth, userController.buyStore);
-router.post("/validatePaymentStore", auth, userController.validPaymentStore);
+router.post("/validatePaymentStore", userController.validPaymentStore);
 
 module.exports = router;

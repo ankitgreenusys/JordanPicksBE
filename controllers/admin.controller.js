@@ -195,7 +195,7 @@ routes.allPackages = async (req, res) => {
 
     const result = packages.slice(startIndex, endIndex);
 
-    return res.status(201).json({
+    return res.status(200).json({
       msg: "success",
       totalPages,
       dta: result,

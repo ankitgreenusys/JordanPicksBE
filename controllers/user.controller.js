@@ -334,7 +334,7 @@ routes.refreshAccessToken = async (req, res) => {
   const refreshToken = req.body.refreshToken;
 
   if (!refreshToken)
-    return res.status(401).send({ error: "Access denied, token missing!" });
+    return res.status(404).send({ error: "Access denied, token missing!" });
 
   // console.log("refressh", refreshToken);
 
@@ -357,7 +357,7 @@ routes.refreshAccessToken = async (req, res) => {
     // return res.send(success(201, { accessToken }));
   } catch (e) {
     console.log(e);
-    return res.status(401).send({ error: "Invalid refresh token" });
+    return res.status(422).send({ error: "Invalid refresh token" });
     // return res.send(error(401, "Invalid refresh token"));
   }
 };
@@ -549,6 +549,8 @@ routes.getMyPackages = async (req, res) => {
 
     const package = await userModel.findById(id).populate("package");
     const packages = package.package;
+    //revese the array
+    packages.reverse();
     const limit = 10;
     const totalPages = Math.ceil(packages.length / limit);
 
@@ -780,7 +782,7 @@ routes.validPaymentPackage = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   const { paymentIntentId, packageId, walletDeduction, cardDeduction } =
     req.body;
-  const id = req.userId;
+  const { id } = req.query;
 
   const { error } = userValid.validPaymentPackageValidation.validate(req.body);
 
@@ -791,25 +793,24 @@ routes.validPaymentPackage = async (req, res) => {
   console.log(req.body, id);
   console.log(paymentIntentId);
   try {
+    const package = await packageModel.findById(packageId);
+    const user = await userModel.findById(id);
+    console.log(package, user);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    if (user.package.includes(packageId)) {
+      return res.status(400).json({ error: "Package already purchased" });
+    }
+    if (!package) {
+      return res.status(404).json({ error: "Package not found" });
+    }
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
-      const package = await packageModel.findById(packageId);
-      const user = await userModel.findById(id);
-      console.log(package, user);
-
-      if (!user) {
-        return res.status(404).json({ error: "user not found" });
-      }
-      if (user.package.includes(packageId)) {
-        return res.status(400).json({ error: "Package already purchased" });
-      }
-      if (!package) {
-        return res.status(404).json({ error: "Package not found" });
-      }
-
       const order = await orderHistoryModel.create({
         user: id,
         package: packageId,
@@ -1177,23 +1178,23 @@ routes.buyStore = async (req, res) => {
 routes.validPaymentStore = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   const { paymentIntentId, storeId } = req.body;
-  const id = req.userId;
+  const { id } = req.query;
 
   try {
+    const store = await storeModel.findById(storeId);
+    const user = await userModel.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    if (!store) {
+      return res.status(404).json({ error: "Item not found" });
+    }
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
-      const store = await storeModel.findById(storeId);
-      const user = await userModel.findById(id);
-
-      if (!user) {
-        return res.status(404).json({ error: "user not found" });
-      }
-      if (!store) {
-        return res.status(404).json({ error: "Item not found" });
-      }
 
       const order = await orderHistoryModel.create({
         user: id,
@@ -1207,6 +1208,7 @@ routes.validPaymentStore = async (req, res) => {
 
       user.store.push(store._id);
       user.orderHistory.push(order._id);
+      user.wallet += store.credits;
 
       await user.save();
       sendPayment(

@@ -23,11 +23,17 @@ app.use(express.static("public/images"));
 
 app.use("/admin", adminRouter);
 app.use("/user", userRouter);
-app.use("/", (req, res) => {
-  return res.send("working");
-});
+
 app.use("/test", (req, res) => {
   res.send("Hello World!");
+});
+
+app.get("*",(req,res)=>{
+    res.status(404).json("invalid request")
+})
+
+app.use("/", (req, res) => {
+  return res.send("working");
 });
 
 mongoose
