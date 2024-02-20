@@ -1197,16 +1197,43 @@ routes.updateUserStatus = async (req, res) => {
 
 routes.directupdate = async (req, res) => {
   try {
-    const allUsers = await userModel.find();
-    // res.json(allUsers)
-
-    allUsers.forEach(async (user) => {
-      await userModel.findByIdAndUpdate(
-        user._id,
-        { username: user._id },
-        { new: true }
-      );
+    const user = await userModel.find({ email: "wfaust02@gmail.com" });
+    const package = await packageModel.findById("659249377fcf5fd3f3e6718d");
+    const order = await orderHistoryModel.create({
+      user: id,
+      package: package._id,
+      status: "active",
+      desc: `Package - ${package.name} purchased (card)`,
+      price: 74.98,
+      type: "Debit",
+      method: "Card",
     });
+
+    const walletOrder = await orderHistoryModel.create({
+      user: id,
+      package: package._id,
+      status: "active",
+      desc: `Package - ${package.name} purchased (wallet)`,
+      price: 25,
+      type: "Debit",
+      method: "Wallet",
+    });
+
+    user.orderHistory.push(walletOrder._id);
+    user.orderHistory.push(order._id);
+    user.package.push(package._id);
+
+    await user.save();
+
+    sendPayment(
+      user.email,
+      user.name,
+      package.name,
+      package.price,
+      order.createdAt,
+      "JordansPicks - Payment Confirmation"
+    );
+
     return res.status(201).json({ msg: "success" });
   } catch (error) {
     console.log(error);
