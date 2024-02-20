@@ -1200,7 +1200,7 @@ routes.directupdate = async (req, res) => {
     const user = await userModel.findById("65a5941b7a9061a79f5ef756");
     const package = await packageModel.findById("659249377fcf5fd3f3e6718d");
     const order = await orderHistoryModel.create({
-      user: user._id, ,
+      user: user._id, 
       package: package._id,
       status: "active",
       desc: `Package - ${package.name} purchased (card)`,
