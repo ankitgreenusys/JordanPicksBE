@@ -64,16 +64,18 @@ const user = mongoose.Schema({
       ref: "vslPackage",
     },
   ],
+  specialPackage: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "specialPackage",
+    },
+  ],
   orderHistory: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "orderHistory",
     },
   ],
-  boughtSpecialPackage: {
-    type: Boolean,
-    default: false,
-  },
   createdAt: {
     type: Date,
     default: function () {

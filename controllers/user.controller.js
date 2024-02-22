@@ -4,6 +4,7 @@ const packageModel = require("../models/package.model");
 const userModel = require("../models/user.model");
 const vslPackageModel = require("../models/vslPackage.model");
 const storeModel = require("../models/store.model");
+const specialPackageModel = require("../models/specialPackage.model");
 
 const sendVerifyAccount = require("../utils/sendVerifyAccount.utils");
 const sendMsg = require("../utils/sendMsg.utils");
@@ -374,6 +375,16 @@ routes.allActivePackages = async (req, res) => {
   }
 };
 
+routes.allSpecialPackages = async (req, res) => {
+  try {
+    const packages = await specialPackageModel.find({ isDeleted: false });
+    return res.status(201).json({ msg: "success", dta: packages });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 routes.allStores = async (req, res) => {
   const { page } = req.query;
 
@@ -449,14 +460,7 @@ routes.userDashboard = async (req, res) => {
 
     console.log(id);
 
-    const user = await userModel
-      .findById(id)
-      .populate([
-        { path: "orderHistory" },
-        { path: "package" },
-        { path: "vslPackage" },
-      ]);
-
+    const user = await userModel.findById(id);
     // console.log(user);
 
     if (!user) {
@@ -465,29 +469,29 @@ routes.userDashboard = async (req, res) => {
 
     // Total Wins and Losses
 
-    const totalPackagesWins = user.package.filter(
-      (item) => item.result === "win"
-    );
+    // const totalPackagesWins = user.package.filter(
+    //   (item) => item.result === "win"
+    // );
 
-    const totalPackagesLosses = user.package.filter(
-      (item) => item.result === "lose"
-    );
+    // const totalPackagesLosses = user.package.filter(
+    //   (item) => item.result === "lose"
+    // );
 
-    const totalPackagesTies = user.package.filter(
-      (item) => item.result === "tie"
-    );
+    // const totalPackagesTies = user.package.filter(
+    //   (item) => item.result === "tie"
+    // );
 
-    const totalVslPackagesWins = user.vslPackage.filter(
-      (item) => item.result === "win"
-    );
+    // const totalVslPackagesWins = user.vslPackage.filter(
+    //   (item) => item.result === "win"
+    // );
 
-    const totalVslPackagesLosses = user.vslPackage.filter(
-      (item) => item.result === "lose"
-    );
+    // const totalVslPackagesLosses = user.vslPackage.filter(
+    //   (item) => item.result === "lose"
+    // );
 
-    const totalVslPackagesTies = user.vslPackage.filter(
-      (item) => item.result === "tie"
-    );
+    // const totalVslPackagesTies = user.vslPackage.filter(
+    //   (item) => item.result === "tie"
+    // );
 
     return res.status(200).json({
       msg: "success",
@@ -503,12 +507,12 @@ routes.userDashboard = async (req, res) => {
         //   totalVslPackagesLosses: totalVslPackagesLosses.length,
         //   totalVslPackagesTies: totalVslPackagesTies.length,
         // },
-        result: {
-          totalWins: totalPackagesWins.length + totalVslPackagesWins.length,
-          totalLosses:
-            totalPackagesLosses.length + totalVslPackagesLosses.length,
-          totalTies: totalPackagesTies.length + totalVslPackagesTies.length,
-        },
+        // result: {
+        //   totalWins: totalPackagesWins.length + totalVslPackagesWins.length,
+        //   totalLosses:
+        //     totalPackagesLosses.length + totalVslPackagesLosses.length,
+        //   totalTies: totalPackagesTies.length + totalVslPackagesTies.length,
+        // },
       },
     });
   } catch (error) {
@@ -526,13 +530,20 @@ routes.getWallet = async (req, res) => {
       return res.status(404).json({ error: "user not found" });
     }
 
+    const act = user.specialPackage.filter((ele) => !ele.isDeleted);
+    let maxdis = 0;
+
+    act.forEach((ele) => {
+      if (ele.discount > maxdis) maxdis = ele.discount;
+    });
+
     return res.status(200).json({
       msg: "success",
       dta: {
         wallet: user.wallet,
         name: user.name,
         isVerified: user.isVerified,
-        boughtSpecialPackage: user.boughtSpecialPackage,
+        defaultDiscount: maxdis,
       },
     });
   } catch (error) {
@@ -1195,7 +1206,6 @@ routes.validPaymentStore = async (req, res) => {
     console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
-
       const order = await orderHistoryModel.create({
         user: id,
         package: storeId,

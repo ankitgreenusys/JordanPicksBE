@@ -15,6 +15,7 @@ router.post("/verifyAccount", userController.verifyAccount);
 router.post("/resetPassOTP", userController.resetPassOTP);
 router.post("/resetPass", userController.resetpassword);
 router.get("/allPackage", userController.allActivePackages);
+router.get("/allSpecialPackages", userController.allSpecialPackages);
 router.get("/allStore", auth, userController.allStores);
 router.get("/getstore/:id", auth, userController.storesById);
 router.get("/getPackage/:id", auth, userController.getPackage);
@@ -26,10 +27,7 @@ router.get("/getMyPackages", auth, userController.getMyPackages);
 router.get("/getTransactions", auth, userController.getTransactions);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
-router.post(
-  "/validatePaymentPackage",
-  userController.validPaymentPackage
-);
+router.post("/validatePaymentPackage", userController.validPaymentPackage);
 router.post("/createIntentVslPackage", auth, userController.buyVslPackage);
 router.post(
   "/validatePaymentVslPackage",
