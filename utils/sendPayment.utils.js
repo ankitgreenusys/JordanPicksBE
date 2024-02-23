@@ -46,7 +46,7 @@ const sendOTP = async (email, name, transactionId, amount, date, title) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(result);
+    // console.log(result);
     return result;
   } catch (error) {
     console.log(error);

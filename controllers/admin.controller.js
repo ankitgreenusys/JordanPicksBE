@@ -95,7 +95,7 @@ routes.allUsers = async (req, res) => {
 
     if (!name && !mobile && !email) users = allusers;
 
-    console.log(users);
+    // console.log(users);
 
     if (sortBy) {
       if (sortBy === "asc") {
@@ -112,7 +112,7 @@ routes.allUsers = async (req, res) => {
     const endIndex = page * limit;
 
     const result = users.slice(startIndex, endIndex);
-    console.log(result);
+    // console.log(result);
 
     return res.status(201).json({
       msg: "success",
@@ -598,7 +598,7 @@ routes.updatePackageStatus = async (req, res) => {
   }
 
   try {
-    console.log(id, status, result);
+    // console.log(id, status, result);
     const package = await packageModel.findOne({ _id: id });
 
     if (!package) {
@@ -1080,7 +1080,7 @@ routes.deletePackage = async (req, res) => {
   try {
     const package = await packageModel.findOne({ _id: id });
 
-    console.log(package);
+    // console.log(package);
 
     if (!package) {
       return res.status(404).json({ error: "package not found" });

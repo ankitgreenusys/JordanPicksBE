@@ -96,7 +96,7 @@ routes.login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: "2s",
     });
 
     const refreshToken = jwt.sign(
@@ -128,7 +128,7 @@ routes.generateOTP = async (req, res) => {
     const { email } = req.body;
 
     const user = await userModel.findOne({ email });
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       return res.status(404).json({ error: "email not found" });
@@ -347,7 +347,7 @@ routes.refreshAccessToken = async (req, res) => {
 
     const id = decoded.id;
     const accessToken = jwt.sign({ id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: "2s",
     });
 
     return res.status(201).send({
@@ -458,7 +458,7 @@ routes.userDashboard = async (req, res) => {
   try {
     const id = req.userId;
 
-    console.log(id);
+    // console.log(id);
 
     const user = await userModel.findById(id);
     // console.log(user);
@@ -533,7 +533,7 @@ routes.getWallet = async (req, res) => {
     const act = user.specialPackage.filter((ele) => !ele.isDeleted);
     let maxdis = 0;
 
-    console.log(act);
+    // console.log(act);
 
     act.forEach((ele) => {
       if (ele.discount > maxdis) maxdis = ele.discount;
@@ -603,7 +603,7 @@ routes.getTransactions = async (req, res) => {
   try {
     const id = req.userId;
 
-    console.log(id);
+    // console.log(id);
 
     const totalOrders = await orderHistoryModel.countDocuments({ user: id });
 
@@ -685,14 +685,14 @@ routes.getPackage = async (req, res) => {
     await package.save();
 
     const isBuied = user.package.find((item) => {
-      console.log(item._id);
+      // console.log(item._id);
       return item._id == id;
     });
     let isBought = false;
     if (isBuied) isBought = true;
     else package.bets = [];
 
-    console.log(isBuied);
+    // console.log(isBuied);
 
     return res.status(200).json({ msg: "success", dta: package, isBought });
   } catch (error) {
@@ -719,7 +719,7 @@ routes.getSpecialPackage = async (req, res) => {
     await package.save();
 
     const isBuied = user.specialPackage.find((item) => {
-      console.log(item._id);
+      // console.log(item._id);
       return item._id == id;
     });
 
@@ -728,7 +728,7 @@ routes.getSpecialPackage = async (req, res) => {
     if (isBuied) isBought = true;
     else package.links = [];
 
-    console.log(isBuied);
+    // console.log(isBuied);
 
     return res.status(200).json({ msg: "success", dta: package, isBought });
   } catch (error) {
@@ -754,16 +754,16 @@ routes.getVslPackage = async (req, res) => {
 
     await package.save();
 
-    console.log(user);
+    // console.log(user);
 
     const isBuied = user.vslPackage.find((item) => {
-      console.log(item._id);
+      // console.log(item._id);
       return item._id == id;
     });
     let isBought = false;
     if (isBuied) isBought = true;
 
-    console.log(isBuied);
+    // console.log(isBuied);
 
     return res.status(200).json({ msg: "success", dta: package, isBought });
   } catch (error) {
@@ -791,7 +791,7 @@ routes.buyPackage = async (req, res) => {
     const user = await userModel.findById(id);
     const package = await packageModel.findById(packageId);
 
-    console.log(package);
+    // console.log(package);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
@@ -812,7 +812,7 @@ routes.buyPackage = async (req, res) => {
       return res.status(400).json({ error: "amount must be greater than 0" });
 
     // const newamount = amount.toFixed(2);
-    console.log((amount * 100).toFixed(0));
+    // console.log((amount * 100).toFixed(0));
     // const newamount =
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -832,7 +832,7 @@ routes.buyPackage = async (req, res) => {
       payment_method_types: ["card"],
     });
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     return res.send({
       clientSecret: paymentIntent.client_secret,
@@ -855,12 +855,12 @@ routes.validPaymentPackage = async (req, res) => {
     return res.status(400).json({ error: error.details[0].message });
   }
 
-  console.log(req.body, id);
-  console.log(paymentIntentId);
+  // console.log(req.body, id);
+  // console.log(paymentIntentId);
   try {
     const package = await packageModel.findById(packageId);
     const user = await userModel.findById(id);
-    console.log(package, user);
+    // console.log(package, user);
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -873,7 +873,7 @@ routes.validPaymentPackage = async (req, res) => {
     }
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
       const order = await orderHistoryModel.create({
@@ -938,7 +938,7 @@ routes.buyVslPackage = async (req, res) => {
     const user = await userModel.findById(id);
     const package = await vslPackageModel.findById(packageId);
 
-    console.log(package);
+    // console.log(package);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
@@ -975,7 +975,7 @@ routes.buyVslPackage = async (req, res) => {
       payment_method_types: ["card"],
     });
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     return res.send({
       clientSecret: paymentIntent.client_secret,
@@ -999,17 +999,17 @@ routes.validPaymentVslPackage = async (req, res) => {
     return res.status(400).json({ error: error.details[0].message });
   }
   const id = req.userId;
-  console.log(req.body, id);
-  console.log(paymentIntentId);
+  // console.log(req.body, id);
+  // console.log(paymentIntentId);
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
       const package = await vslPackageModel.findById(packageId);
       const user = await userModel.findById(id);
-      console.log(package, user);
+      // console.log(package, user);
 
       if (!user) {
         return res.status(404).json({ error: "user not found" });
@@ -1067,7 +1067,7 @@ routes.validPaymentVslPackage = async (req, res) => {
 routes.walletWithdrawPackage = async (req, res) => {
   try {
     const id = req.userId;
-    const { packageId } = req.body;
+    const { packageId, amount } = req.body;
 
     const { error } = userValid.walletWithdrawPackageValidation.validate(
       req.body
@@ -1091,18 +1091,18 @@ routes.walletWithdrawPackage = async (req, res) => {
       return res.status(404).json({ error: "package not found" });
     }
 
-    if (user.wallet < package.price) {
+    if (user.wallet < amount) {
       return res.status(400).json({ error: "insufficient balance" });
     }
 
-    user.wallet = user.wallet - package.price;
+    user.wallet = user.wallet - amount;
 
     const newOrder = await orderHistoryModel.create({
       user: id,
       package: packageId,
       status: "active",
       desc: `Package - ${package.name} purchased (wallet)`,
-      price: package.price,
+      price: amount,
       type: "Debit",
       method: "Wallet",
     });
@@ -1116,7 +1116,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       user.email,
       user.name,
       package.name,
-      package.price,
+      amount,
       newOrder.createdAt,
       "JordansPicks - Payment Confirmation"
     );
@@ -1195,13 +1195,13 @@ routes.buyStore = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
   try {
     const { storeId } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     const id = req.userId;
 
     const user = await userModel.findById(id);
     const store = await storeModel.findById(storeId);
 
-    console.log(store);
+    // console.log(store);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
@@ -1229,7 +1229,7 @@ routes.buyStore = async (req, res) => {
       payment_method_types: ["card"],
     });
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     return res.send({
       clientSecret: paymentIntent.client_secret,
@@ -1257,7 +1257,7 @@ routes.validPaymentStore = async (req, res) => {
     }
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     if (paymentIntent.status === "succeeded") {
       const order = await orderHistoryModel.create({
@@ -1308,7 +1308,7 @@ routes.buySpecialPackage = async (req, res) => {
     const user = await userModel.findById(id);
     const package = await specialPackageModel.findById(packageId);
 
-    console.log(package);
+    // console.log(package);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
@@ -1339,7 +1339,7 @@ routes.buySpecialPackage = async (req, res) => {
       payment_method_types: ["card"],
     });
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     return res.send({
       clientSecret: paymentIntent.client_secret,
@@ -1363,12 +1363,12 @@ routes.validPaymentSpecialPackage = async (req, res) => {
   //   return res.status(400).json({ error: error.details[0].message });
   // }
 
-  console.log(req.body, id);
-  console.log(paymentIntentId);
+  // console.log(req.body, id);
+  // console.log(paymentIntentId);
   try {
     const package = await specialPackageModel.findById(packageId);
     const user = await userModel.findById(id);
-    console.log(package, user);
+    // console.log(package, user);
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -1382,7 +1382,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
 
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    console.log(paymentIntent);
+    // console.log(paymentIntent);
 
     const cardDeduction = package.price;
 

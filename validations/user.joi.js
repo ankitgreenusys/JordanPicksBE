@@ -65,6 +65,7 @@ const validPaymentVslPackageValidation = Joi.object({
 
 const walletWithdrawPackageValidation = Joi.object({
   packageId: Joi.string().required(),
+  amount: Joi.number().required(),
 });
 
 const walletWithdrawVslPackageValidation = Joi.object({
