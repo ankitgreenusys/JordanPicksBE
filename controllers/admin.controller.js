@@ -423,10 +423,12 @@ routes.allOrders = async (req, res) => {
 routes.overview = async (req, res) => {
   try {
     const users = await userModel.find({ isVerified: true });
+    const totaluser = await userModel.find();
     const contacts = await contactModel.find();
     const packages = await packageModel.find();
     const vslPackages = await vslPackageModel.find();
     const orders = await orderHistoryModel.find();
+    const specialPackage = await specialPackageModel.find();
 
     return res.status(201).json({
       msg: "success",
@@ -436,6 +438,8 @@ routes.overview = async (req, res) => {
         packages: packages.length,
         vslPackages: vslPackages.length,
         orders: orders.length,
+        totaluser: totaluser.length,
+        specialPackage: specialPackage.length,
       },
     });
   } catch (error) {
@@ -484,7 +488,8 @@ routes.addPackage = async (req, res) => {
 };
 
 routes.addSpecialPackage = async (req, res) => {
-  const { name, price, links, description, gamePreview, discount } = req.body;
+  const { name, price, links, description, gamePreview, discount, videoURL } =
+    req.body;
 
   // const { error } = adminValid.addSpecialPackageValidation.validate(req.body);
 
@@ -500,6 +505,7 @@ routes.addSpecialPackage = async (req, res) => {
       gamePreview,
       links,
       discount,
+      videoURL,
     });
 
     return res.status(201).json({ msg: "success", dta: newPackage });
@@ -945,7 +951,8 @@ routes.updatePackage = async (req, res) => {
 
 routes.updateSpecialPackage = async (req, res) => {
   const { id } = req.params;
-  const { name, price, links, description, gamePreview, discount } = req.body;
+  const { name, price, links, description, gamePreview, discount, videoURL } =
+    req.body;
 
   // const { error } = adminValid.updateSpecialPackageValidation.validate(
   //   req.body
@@ -969,6 +976,7 @@ routes.updateSpecialPackage = async (req, res) => {
         description,
         gamePreview,
         links,
+        videoURL,
         discount,
       },
       { new: true }

@@ -14,6 +14,14 @@ const orderHistorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "vslPackage",
   },
+  specialPackage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "specialPackage",
+  },
+  store: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "store",
+  },
   status: {
     type: String,
     enum: ["active", "inactive"],

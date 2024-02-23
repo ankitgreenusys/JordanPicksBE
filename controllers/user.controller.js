@@ -524,7 +524,7 @@ routes.userDashboard = async (req, res) => {
 routes.getWallet = async (req, res) => {
   try {
     const id = req.userId;
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).populate("specialPackage");
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -533,6 +533,8 @@ routes.getWallet = async (req, res) => {
     const act = user.specialPackage.filter((ele) => !ele.isDeleted);
     let maxdis = 0;
 
+    console.log(act);
+
     act.forEach((ele) => {
       if (ele.discount > maxdis) maxdis = ele.discount;
     });
@@ -540,6 +542,7 @@ routes.getWallet = async (req, res) => {
     return res.status(200).json({
       msg: "success",
       dta: {
+        _id: user._id,
         wallet: user.wallet,
         name: user.name,
         isVerified: user.isVerified,
@@ -558,10 +561,23 @@ routes.getMyPackages = async (req, res) => {
   try {
     const id = req.userId;
 
-    const package = await userModel.findById(id).populate("package");
-    const packages = package.package;
+    const package = await userModel
+      .findById(id)
+      .populate("package specialPackage");
+    const packag = package.package;
+    const specialPackages = package.specialPackage;
+
+    // console.log(specialPackages);
+    //append special packages
+    // package.specialPackage.forEach((item) => {
+    //   packages.push(item);
+    // });
+    // without for each
+    // packages.push(...specialPackages);
+    const packages = [...packag, ...specialPackages];
     //revese the array
     packages.reverse();
+    // console.log(packages);
     const limit = 10;
     const totalPages = Math.ceil(packages.length / limit);
 
@@ -595,6 +611,8 @@ routes.getTransactions = async (req, res) => {
       .find({ user: id })
       .populate("package")
       .populate("vslPackage")
+      .populate("specialPackage")
+      .populate("store")
       .sort({ createdAt: -1 })
       .skip((page - 1) * 10)
       .limit(10);
@@ -673,6 +691,42 @@ routes.getPackage = async (req, res) => {
     let isBought = false;
     if (isBuied) isBought = true;
     else package.bets = [];
+
+    console.log(isBuied);
+
+    return res.status(200).json({ msg: "success", dta: package, isBought });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.getSpecialPackage = async (req, res) => {
+  try {
+    const uid = req.userId;
+    const id = req.params.id;
+    const package = await specialPackageModel.findById(id);
+    const user = await userModel.findById(uid).populate("specialPackage");
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (!package.pageCount) package.pageCount = 0;
+
+    package.pageCount = package.pageCount + 1;
+
+    await package.save();
+
+    const isBuied = user.specialPackage.find((item) => {
+      console.log(item._id);
+      return item._id == id;
+    });
+
+    let isBought = false;
+
+    if (isBuied) isBought = true;
+    else package.links = [];
 
     console.log(isBuied);
 
@@ -1208,7 +1262,7 @@ routes.validPaymentStore = async (req, res) => {
     if (paymentIntent.status === "succeeded") {
       const order = await orderHistoryModel.create({
         user: id,
-        package: storeId,
+        store: storeId,
         status: "active",
         desc: `Store - ${store.name} purchased`,
         price: store.price,
@@ -1226,6 +1280,132 @@ routes.validPaymentStore = async (req, res) => {
         user.name,
         store.name,
         store.price,
+        order.createdAt,
+        "JordansPicks - Payment Confirmation"
+      );
+    }
+
+    return res.send({
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ status: "Failed" });
+  }
+};
+
+routes.buySpecialPackage = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { packageId } = req.body;
+  const id = req.userId;
+  try {
+    // const { error } = userValid.buySpecialPackageValidation.validate(req.body);
+
+    // if (error) {
+    //   return res.status(400).json({ error: error.details[0].message });
+    // }
+
+    const user = await userModel.findById(id);
+    const package = await specialPackageModel.findById(packageId);
+
+    console.log(package);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (user.specialPackage.includes(packageId)) {
+      return res.status(400).json({ error: "package already purchased" });
+    }
+
+    const amount = package.price;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      description: package.name,
+      shipping: {
+        name: user.name,
+        address: {
+          line1: "510 Townsend St",
+          postal_code: "98140",
+          city: "San Francisco",
+          state: "CA",
+          country: "US",
+        },
+      },
+      amount: (amount * 100).toFixed(0),
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+
+    console.log(paymentIntent);
+
+    return res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.validPaymentSpecialPackage = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { paymentIntentId, packageId } = req.body;
+  const { id } = req.query;
+
+  // const { error } = userValid.validPaymentSpecialPackageValidation.validate(
+  //   req.body
+  // );
+
+  // if (error) {
+  //   return res.status(400).json({ error: error.details[0].message });
+  // }
+
+  console.log(req.body, id);
+  console.log(paymentIntentId);
+  try {
+    const package = await specialPackageModel.findById(packageId);
+    const user = await userModel.findById(id);
+    console.log(package, user);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    if (user.specialPackage.includes(packageId)) {
+      return res.status(400).json({ error: "Package already purchased" });
+    }
+    if (!package) {
+      return res.status(404).json({ error: "Package not found" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    console.log(paymentIntent);
+
+    const cardDeduction = package.price;
+
+    if (paymentIntent.status === "succeeded") {
+      const order = await orderHistoryModel.create({
+        user: id,
+        specialPackage: packageId,
+        status: "active",
+        desc: `Package - ${package.name} purchased (card)`,
+        price: cardDeduction,
+        type: "Debit",
+        method: "Card",
+      });
+
+      user.specialPackage.push(package._id);
+      user.orderHistory.push(order._id);
+
+      await user.save();
+      sendPayment(
+        user.email,
+        user.name,
+        package.name,
+        package.price,
         order.createdAt,
         "JordansPicks - Payment Confirmation"
       );

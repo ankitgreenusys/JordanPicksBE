@@ -20,6 +20,7 @@ router.get("/allStore", auth, userController.allStores);
 router.get("/getstore/:id", auth, userController.storesById);
 router.get("/getPackage/:id", auth, userController.getPackage);
 router.get("/getVslPackage/:id", auth, userController.getVslPackage);
+router.get("/getSpecialPackage/:id", auth, userController.getSpecialPackage);
 router.post("/contact", userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
 router.get("/getProfileShort", auth, userController.getWallet);
@@ -46,5 +47,14 @@ router.post(
 );
 router.post("/createIntentStore", auth, userController.buyStore);
 router.post("/validatePaymentStore", userController.validPaymentStore);
+router.post(
+  "/createIntentSpecialPackage",
+  auth,
+  userController.buySpecialPackage
+);
+router.post(
+  "/validatePaymentSpecialPackage",
+  userController.validPaymentSpecialPackage
+);
 
 module.exports = router;

@@ -35,11 +35,16 @@ router.put("/updateSpecialPackage/:id", auth, controller.updateSpecialPackage);
 router.put("/updateVslPackage/:id", auth, controller.updateVslPackage);
 router.put("/updateStore/:id", auth, controller.updateStore);
 router.delete("/deletePackage/:id", auth, controller.deletePackage);
-router.delete("/deleteSpecialPackage/:id", auth, controller.deleteSpecialPackage);
+router.delete(
+  "/deleteSpecialPackage/:id",
+  auth,
+  controller.deleteSpecialPackage
+);
 router.delete("/deleteStore/:id", auth, controller.deleteStore);
 router.delete("/deleteVslPackage/:id", auth, controller.deleteVslPackage);
 router.get("/deletedPackages", auth, controller.deletedPackages);
 router.get("/deletedVslPackages", auth, controller.deletedVslPackages);
+router.get("/deletedSpecialPackages", auth, controller.deletedSpecialPackage);
 router.get("/bulkPackageMail", auth, controller.bulkPackageMail);
 router.get("/bulkCustomMail", auth, controller.bulkCustomMail);
 router.get("/getUser/:id", controller.getUserById);

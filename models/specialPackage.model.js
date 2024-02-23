@@ -20,6 +20,9 @@ const specialPackageSchema = new mongoose.Schema({
   links: {
     type: Array,
   },
+  videoURL: {
+    type: String,
+  },
   discount: {
     type: Number,
     default: 0,
