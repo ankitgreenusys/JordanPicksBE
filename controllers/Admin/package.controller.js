@@ -208,6 +208,8 @@ routes.updatePackageStatus = async (req, res) => {
           status: "inactive",
           desc: "Refund of " + orders[0].package.name + " package",
           price: orders[0].package.price,
+          type: "Credit",
+          method: "Wallet",
         });
 
         await userModel.findOneAndUpdate(
