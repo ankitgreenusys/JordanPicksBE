@@ -151,7 +151,7 @@ routes.updatePackageStatus = async (req, res) => {
       result = package.result;
     }
 
-    if (result === "tie" && result === "lose") {
+    if (result === "tie" || result === "lose") {
       //credit price to all users wallet who bought
       const orders = await orderHistoryModel
         .find({ package: id })
