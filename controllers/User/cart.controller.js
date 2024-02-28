@@ -60,20 +60,17 @@ routes.getCart = async (req, res) => {
   const id = req.userId;
 
   try {
-    const user = await userModel.findById(id).populate("cart");
+    // const user = await userModel.findById(id).populate({
+    //   path: "cart",
+    //   select: "-bets",
+    // });
+    const user = await userModel.findById(id).populate("cart", "-bets");
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
 
-    const cart = user.cart.map((item) => {
-      return {
-        ...item,
-        bets: [],
-      };
-    });
-
-    return res.status(200).json({ msg: "success", dta: cart });
+    return res.status(200).json({ msg: "success", dta: user.cart });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
