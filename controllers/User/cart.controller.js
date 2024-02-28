@@ -66,7 +66,14 @@ routes.getCart = async (req, res) => {
       return res.status(404).json({ error: "user not found" });
     }
 
-    return res.status(200).json({ msg: "success", dta: user.cart });
+    const cart = user.cart.map((item) => {
+      return {
+        ...item,
+        bets: [],
+      };
+    });
+
+    return res.status(200).json({ msg: "success", dta: cart });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

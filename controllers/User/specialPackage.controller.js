@@ -9,6 +9,9 @@ const routes = {};
 routes.allSpecialPackages = async (req, res) => {
   try {
     const packages = await specialPackageModel.find({ isDeleted: false });
+
+    packages.bets = [];
+
     return res.status(201).json({ msg: "success", dta: packages });
   } catch (error) {
     console.log(error);
