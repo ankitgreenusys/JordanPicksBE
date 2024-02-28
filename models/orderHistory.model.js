@@ -22,6 +22,12 @@ const orderHistorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "store",
   },
+  cart: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "package",
+    },
+  ],
   status: {
     type: String,
     enum: ["active", "inactive"],

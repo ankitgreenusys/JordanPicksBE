@@ -57,4 +57,12 @@ router.post(
   userController.validPaymentSpecialPackage
 );
 
+router.post("/addItemToCart", auth, userController.addItemToCart);
+router.patch("/removeItemFromCart", auth, userController.removeItemFromCart);
+router.get("/getCart", auth, userController.getCart);
+router.delete("/clearCart", auth, userController.clearCart);
+router.post("/createIntentCart", auth, userController.createIntentCart);
+router.post("/validatePaymentCart", userController.validPaymentCart);
+router.post("/walletWithdrawCart", auth, userController.walletWithdrawCart);
+
 module.exports = router;

@@ -7,7 +7,15 @@ const specialPackageSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: true,
+    default: 0,
+  },
+  monthlyPrice: {
+    type: Number,
+    default: 0,
+  },
+  yearlyPrice: {
+    type: Number,
+    default: 0,
   },
   description: {
     type: String,

@@ -33,6 +33,20 @@ const user = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  referralCode: {
+    type: String,
+    unique: true,
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+  },
+  referred: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
+  ],
   status: {
     type: String,
     enum: ["active", "suspended", "deleted"],
@@ -74,6 +88,12 @@ const user = mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "orderHistory",
+    },
+  ],
+  cart: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "package",
     },
   ],
   createdAt: {

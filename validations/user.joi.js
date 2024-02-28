@@ -4,7 +4,7 @@ const createUserValidation = Joi.object({
   email: Joi.string().email().required(),
   name: Joi.string().required(),
   mobile: Joi.number().required(),
-  // username: Joi.string(),
+  refBy: Joi.string(),
   password: Joi.string().required(),
 });
 
