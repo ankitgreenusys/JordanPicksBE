@@ -41,12 +41,6 @@ const user = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  referred: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-    },
-  ],
   status: {
     type: String,
     enum: ["active", "suspended", "deleted"],

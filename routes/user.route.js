@@ -64,5 +64,6 @@ router.delete("/clearCart", auth, userController.clearCart);
 router.post("/createIntentCart", auth, userController.createIntentCart);
 router.post("/validatePaymentCart", userController.validPaymentCart);
 router.post("/walletWithdrawCart", auth, userController.walletWithdrawCart);
+router.get("/getReferredUsers", auth, userController.getReferredUsers);
 
 module.exports = router;

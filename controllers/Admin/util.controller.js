@@ -55,13 +55,23 @@ routes.bulkCustomMail = async (req, res) => {
 
 routes.directupdate = async (req, res) => {
   try {
-    const user = await userModel.findById("65a5941b7a9061a79f5ef756");
-    // const package = await packageModel.findById("659249377fcf5fd3f3e6718d");
+    const user = await userModel.find();
 
-    // pop last element from package array
-    user.package.pop();
+    user.forEach(async (item) => {
+      // refferal code
+      const referralCode = Math.random()
+        .toString(36)
+        .substring(2, 12)
+        .toUpperCase();
 
-    await user.save();
+      // add in every user
+
+      await userModel.findOneAndUpdate(
+        { _id: item._id },
+        { referralCode },
+        { new: true }
+      );
+    });
 
     return res.status(201).json({ msg: "success" });
   } catch (error) {

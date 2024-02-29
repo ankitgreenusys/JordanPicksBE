@@ -158,6 +158,24 @@ routes.validPaymentSpecialPackage = async (req, res) => {
         method: "Card",
       });
 
+      if (user.referredBy) {
+        const refUser = await userModel.findById(user.referredBy);
+        if (refUser) {
+          const val = +(0.25 * cardDeduction).toFixed(2);
+          refUser.wallet += val;
+          const refOrder = await orderHistoryModel.create({
+            user: refUser._id,
+            status: "active",
+            desc: `Referral Bonus`,
+            price: val,
+            type: "Credit",
+            method: "Wallet",
+          });
+          refUser.orderHistory.push(refOrder._id);
+          await refUser.save();
+        }
+      }
+
       user.specialPackage.push(package._id);
       user.orderHistory.push(order._id);
 
