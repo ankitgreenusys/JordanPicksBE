@@ -212,7 +212,7 @@ routes.walletWithdrawVslPackage = async (req, res) => {
       return res.status(404).json({ error: "package not found" });
     }
 
-    if (user.wallet < package.price) {
+    if (user.wallet < package.price.toFixed(2)) {
       return res.status(400).json({ error: "insufficient balance" });
     }
 

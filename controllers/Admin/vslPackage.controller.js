@@ -71,8 +71,8 @@ routes.addVslPackage = async (req, res) => {
   try {
     const newPackage = await vslPackageModel.create({
       name,
-      actPrice,
-      discountedPrice,
+      actPrice: actPrice.toFixed(2) || 0,
+      discountedPrice: discountedPrice.toFixed(2) || 0,
       description,
       gamePreview,
       startDate,
@@ -145,7 +145,7 @@ routes.updateVslPackageStatus = async (req, res) => {
     uniqueuser.forEach(async (userId) => {
       await userModel.findOneAndUpdate(
         { _id: userId },
-        { $inc: { wallet: orders[0].vslPackage.discountedPrice } },
+        { $inc: { wallet: orders[0].vslPackage.discountedPrice.toFixed(2) } },
         { new: true }
       );
 
@@ -154,7 +154,7 @@ routes.updateVslPackageStatus = async (req, res) => {
         vslPackage: id,
         status: "inactive",
         desc: "Refund of " + orders[0].vslPackage.name + " package",
-        price: orders[0].vslPackage.discountedPrice,
+        price: orders[0].vslPackage.discountedPrice.toFixed(2),
       });
 
       await userModel.findOneAndUpdate(

@@ -160,7 +160,7 @@ routes.validPaymentPackage = async (req, res) => {
         package: packageId,
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
-        price: cardDeduction,
+        price: cardDeduction.toFixed(2),
         type: "Debit",
         method: "Card",
       });
@@ -174,7 +174,7 @@ routes.validPaymentPackage = async (req, res) => {
             user: refUser._id,
             status: "active",
             desc: `Bonus from ${user.name} purchase`,
-            price: val,
+            price: val.toFixed(2),
             type: "Credit",
             method: "Wallet",
           });
@@ -189,7 +189,7 @@ routes.validPaymentPackage = async (req, res) => {
           package: packageId,
           status: "active",
           desc: `Package - ${package.name} purchased (wallet)`,
-          price: walletDeduction,
+          price: walletDeduction.toFixed(2),
           type: "Debit",
           method: "Wallet",
         });
@@ -205,7 +205,7 @@ routes.validPaymentPackage = async (req, res) => {
         user.email,
         user.name,
         package.name,
-        package.price,
+        package.price.toFixed(2),
         order.createdAt,
         "JordansPicks - Payment Confirmation"
       );
@@ -258,7 +258,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       package: packageId,
       status: "active",
       desc: `Package - ${package.name} purchased (wallet)`,
-      price: amount,
+      price: amount.toFixed(2),
       type: "Debit",
       method: "Wallet",
     });
@@ -272,7 +272,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       user.email,
       user.name,
       package.name,
-      amount,
+      amount.toFixed(2),
       newOrder.createdAt,
       "JordansPicks - Payment Confirmation"
     );

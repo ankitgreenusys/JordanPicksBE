@@ -81,7 +81,7 @@ routes.buySpecialPackage = async (req, res) => {
       return res.status(400).json({ error: "package already purchased" });
     }
 
-    const amount = package.price;
+    const amount = package.price.toFixed(2);
 
     const paymentIntent = await stripe.paymentIntents.create({
       description: package.name,
@@ -145,7 +145,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
 
     // console.log(paymentIntent);
 
-    const cardDeduction = package.price;
+    const cardDeduction = package.price.toFixed(2);
 
     if (paymentIntent.status === "succeeded") {
       const order = await orderHistoryModel.create({
@@ -153,7 +153,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
         specialPackage: packageId,
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
-        price: cardDeduction,
+        price: cardDeduction.toFixed(2),
         type: "Debit",
         method: "Card",
       });
@@ -167,7 +167,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
             user: refUser._id,
             status: "active",
             desc: `Referral Bonus`,
-            price: val,
+            price: val.toFixed(2),
             type: "Credit",
             method: "Wallet",
           });
@@ -184,7 +184,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
         user.email,
         user.name,
         package.name,
-        package.price,
+        package.price.toFixed(2),
         order.createdAt,
         "JordansPicks - Payment Confirmation"
       );

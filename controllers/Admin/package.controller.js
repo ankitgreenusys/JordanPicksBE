@@ -108,7 +108,7 @@ routes.addPackage = async (req, res) => {
   try {
     const newPackage = await packageModel.create({
       name,
-      price,
+      price: price.toFixed(2),
       endDate,
       description,
       gamePreview,
@@ -198,7 +198,7 @@ routes.updatePackageStatus = async (req, res) => {
       uniqueuser.forEach(async (userId) => {
         await userModel.findOneAndUpdate(
           { _id: userId },
-          { $inc: { wallet: orders[0].package.price } },
+          { $inc: { wallet: orders[0].package.price.toFixed(2) } },
           { new: true }
         );
 
@@ -207,7 +207,7 @@ routes.updatePackageStatus = async (req, res) => {
           package: id,
           status: "inactive",
           desc: "Refund of " + orders[0].package.name + " package",
-          price: orders[0].package.price,
+          price: orders[0].package.price.toFixed(2),
           type: "Credit",
           method: "Wallet",
         });
@@ -282,7 +282,7 @@ routes.updatePackage = async (req, res) => {
       { _id: id },
       {
         name,
-        price,
+        price: price.toFixed(2),
         endDate,
         description,
         gamePreview,

@@ -65,8 +65,8 @@ routes.addSpecialPackage = async (req, res) => {
   try {
     const newPackage = await specialPackageModel.create({
       name,
-      monthlyPrice,
-      yearlyPrice,
+      monthlyPrice: monthlyPrice.toFixed(2) || 0,
+      yearlyPrice: yearlyPrice.toFixed(2) || 0,
       description,
       gamePreview,
       links,
@@ -112,8 +112,8 @@ routes.updateSpecialPackage = async (req, res) => {
       { _id: id },
       {
         name,
-        monthlyPrice,
-        yearlyPrice,
+        monthlyPrice: monthlyPrice.toFixed(2) || 0,
+        yearlyPrice: yearlyPrice.toFixed(2) || 0,
         description,
         gamePreview,
         links,

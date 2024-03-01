@@ -69,7 +69,7 @@ routes.buyStore = async (req, res) => {
       return res.status(404).json({ error: "Item not found" });
     }
 
-    const amount = store.price;
+    const amount = store.price.toFixed(2);
 
     const paymentIntent = await stripe.paymentIntents.create({
       description: store.name,
@@ -124,7 +124,7 @@ routes.validPaymentStore = async (req, res) => {
         store: storeId,
         status: "active",
         desc: `Store - ${store.name} purchased`,
-        price: store.price,
+        price: store.price.toFixed(2),
         type: "Debit",
         method: "Card",
       });
@@ -138,7 +138,7 @@ routes.validPaymentStore = async (req, res) => {
             user: refUser._id,
             status: "active",
             desc: `Referral Bonus`,
-            price: val,
+            price: val.toFixed(2),
             type: "Credit",
             method: "Wallet",
           });
@@ -156,7 +156,7 @@ routes.validPaymentStore = async (req, res) => {
         user.email,
         user.name,
         store.name,
-        store.price,
+        store.price.toFixed(2),
         order.createdAt,
         "JordansPicks - Payment Confirmation"
       );

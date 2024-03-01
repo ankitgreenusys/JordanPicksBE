@@ -58,7 +58,11 @@ routes.addStore = async (req, res) => {
   }
 
   try {
-    const newStore = await storeModel.create({ name, price, credits });
+    const newStore = await storeModel.create({
+      name,
+      price: price.toFixed(2) || 0,
+      credits,
+    });
 
     return res.status(201).json({ msg: "success", dta: newStore });
   } catch (error) {
@@ -87,7 +91,7 @@ routes.updateStore = async (req, res) => {
       { _id: id },
       {
         name,
-        price,
+        price: price.toFixed(2) || 0,
         credits,
       },
       { new: true }
