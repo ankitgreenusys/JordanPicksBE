@@ -351,4 +351,30 @@ routes.deletedPackages = async (req, res) => {
   }
 };
 
+routes.giftPackage = async (req, res) => {
+  const { userId, packageId } = req.body;
+  try {
+    const user = await userModel.findById(userId);
+    const package = await packageModel.findById(packageId);
+
+    if (!user) return res.status(404).json({ error: "user not found" });
+
+    if (!package) return res.status(404).json({ error: "package not found" });
+
+    if (user.package.includes(packageId))
+      return res.status(400).json({ error: "package already purchased" });
+
+    await userModel.findOneAndUpdate(
+      { _id: userId },
+      { $push: { package: packageId } },
+      { new: true }
+    );
+
+    return res.status(201).json({ msg: "success" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
 module.exports = routes;

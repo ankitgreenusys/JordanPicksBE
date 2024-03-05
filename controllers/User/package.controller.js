@@ -152,7 +152,9 @@ routes.validPaymentPackage = async (req, res) => {
     }
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    // console.log(paymentIntent);
+    console.log(paymentIntent);
+    console.log(cardDeduction);
+    console.log(typeof cardDeduction);
 
     if (paymentIntent.status === "succeeded") {
       const order = await orderHistoryModel.create({
@@ -160,7 +162,7 @@ routes.validPaymentPackage = async (req, res) => {
         package: packageId,
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
-        price: cardDeduction.toFixed(2),
+        price: parseInt(cardDeduction).toFixed(2),
         type: "Debit",
         method: "Card",
       });
@@ -168,7 +170,7 @@ routes.validPaymentPackage = async (req, res) => {
       if (user.referredBy) {
         const refUser = await userModel.findById(user.referredBy);
         if (refUser) {
-          const val = +(0.25 * cardDeduction).toFixed(2);
+          const val = +(0.25 * +cardDeduction).toFixed(2);
           refUser.wallet += val;
           const refOrder = await orderHistoryModel.create({
             user: refUser._id,
@@ -189,7 +191,7 @@ routes.validPaymentPackage = async (req, res) => {
           package: packageId,
           status: "active",
           desc: `Package - ${package.name} purchased (wallet)`,
-          price: walletDeduction.toFixed(2),
+          price: +walletDeduction.toFixed(2),
           type: "Debit",
           method: "Wallet",
         });

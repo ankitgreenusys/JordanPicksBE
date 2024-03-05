@@ -41,31 +41,31 @@ const updateProfileValidation = Joi.object({
 
 const buyPackageValidation = Joi.object({
   packageId: Joi.string().required(),
-  amount: Joi.number().required(),
+  amount: Joi.number().required().strict(),
 });
 
 const validPaymentPackageValidation = Joi.object({
   packageId: Joi.string().required(),
   paymentIntentId: Joi.string().required(),
-  walletDeduction: Joi.number().required(),
-  cardDeduction: Joi.number().required(),
+  walletDeduction: Joi.number().required().strict(),
+  cardDeduction: Joi.number().required().strict(),
 });
 
 const buyVslPackageValidation = Joi.object({
   packageId: Joi.string().required(),
-  amount: Joi.number().required(),
+  amount: Joi.number().required().strict(),
 });
 
 const validPaymentVslPackageValidation = Joi.object({
   packageId: Joi.string().required(),
   paymentIntentId: Joi.string().required(),
-  walletDeduction: Joi.number().required(),
-  cardDeduction: Joi.number().required(),
+  walletDeduction: Joi.number().required().strict(),
+  cardDeduction: Joi.number().required().strict(),
 });
 
 const walletWithdrawPackageValidation = Joi.object({
   packageId: Joi.string().required(),
-  amount: Joi.number().required(),
+  amount: Joi.number().required().strict(),
 });
 
 const walletWithdrawVslPackageValidation = Joi.object({

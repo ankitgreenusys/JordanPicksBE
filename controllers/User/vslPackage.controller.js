@@ -146,7 +146,7 @@ routes.validPaymentVslPackage = async (req, res) => {
         vslPackage: packageId,
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
-        price: cardDeduction,
+        price: +cardDeduction,
       });
 
       if (walletDeduction > 0) {

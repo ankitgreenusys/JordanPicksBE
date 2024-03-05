@@ -178,7 +178,7 @@ routes.validPaymentCart = async (req, res) => {
         user: id,
         status: "active",
         desc: `Cart purchased (card)`,
-        price: cardDeduction.toFixed(2),
+        price: +cardDeduction.toFixed(2),
         type: "Debit",
         method: "Card",
         cart: [...user.cart],
@@ -187,7 +187,7 @@ routes.validPaymentCart = async (req, res) => {
       if (user.referredBy) {
         const refUser = await userModel.findById(user.referredBy);
         if (refUser) {
-          const val = +(0.25 * cardDeduction).toFixed(2);
+          const val = +(0.25 * +cardDeduction).toFixed(2);
           refUser.wallet += val;
           const refOrder = await orderHistoryModel.create({
             user: refUser._id,

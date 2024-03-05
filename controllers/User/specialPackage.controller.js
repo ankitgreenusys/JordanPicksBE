@@ -153,7 +153,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
         specialPackage: packageId,
         status: "active",
         desc: `Package - ${package.name} purchased (card)`,
-        price: cardDeduction.toFixed(2),
+        price: parseInt(cardDeduction).toFixed(2),
         type: "Debit",
         method: "Card",
       });
@@ -161,7 +161,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
       if (user.referredBy) {
         const refUser = await userModel.findById(user.referredBy);
         if (refUser) {
-          const val = +(0.25 * cardDeduction).toFixed(2);
+          const val = +(0.25 * +cardDeduction).toFixed(2);
           refUser.wallet += val;
           const refOrder = await orderHistoryModel.create({
             user: refUser._id,
@@ -196,6 +196,50 @@ routes.validPaymentSpecialPackage = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(200).json({ status: "Failed" });
+  }
+};
+
+routes.buyMonthlyPackage = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { packageId } = req.body;
+  const id = req.userId;
+  try {
+    // const { error } = userValid.buySpecialPackageValidation.validate(req.body);
+
+    // if (error) {
+    //   return res.status(400).json({ error: error.details[0].message });
+    // }
+
+    const user = await userModel.findById(id);
+    const package = await specialPackageModel.findById(packageId);
+
+    // console.log(package);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (user.specialPackage.includes(packageId)) {
+      return res.status(400).json({ error: "package already purchased" });
+    }
+
+    const amount = package.price.toFixed(2);
+
+    // reccuring payment
+
+    const customer = await stripe.customers.create({
+      email: user.email,
+      source: "tok_visa",
+    });
+
+    
+
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
   }
 };
 

@@ -32,7 +32,7 @@ routes.allStores = async (req, res) => {
 };
 
 routes.storesById = async (req, res) => {
-  const { id } = req.id;
+  const { id } = req.params;
 
   try {
     const store = await storeModel.findById(id);

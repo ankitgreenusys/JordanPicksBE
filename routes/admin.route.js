@@ -31,6 +31,7 @@ router.patch(
   controller.updateVslPackageStatus
 );
 router.put("/updatePackage/:id", auth, controller.updatePackage);
+router.post("/giftPackage", auth, controller.giftPackage);
 router.put("/updateSpecialPackage/:id", auth, controller.updateSpecialPackage);
 router.put("/updateVslPackage/:id", auth, controller.updateVslPackage);
 router.put("/updateStore/:id", auth, controller.updateStore);
