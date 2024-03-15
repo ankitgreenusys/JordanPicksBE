@@ -1,8 +1,8 @@
 const packageModel = require("../../models/package.model");
 const userModel = require("../../models/user.model");
 
-const sendAllPackage = require("../../utils/sendAllPackageMsg.utils");
-const sendCustomMsg = require("../../utils/sendCustomMsg.utils");
+const sendAllPackage = require("../../utils/MailService/sendAllPackageMsg.utils");
+const sendCustomMsg = require("../../utils/MailService/sendCustomMsg.utils");
 
 const routes = {};
 

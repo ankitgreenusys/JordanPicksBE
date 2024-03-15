@@ -1,7 +1,7 @@
 const userModel = require("../../models/user.model");
 const orderHistoryModel = require("../../models/orderHistory.model");
 
-const sendPayment = require("../../utils/sendPayment.utils");
+const sendPayment = require("../../utils/MailService/sendPayment.utils");
 
 const routes = {};
 
@@ -14,6 +14,10 @@ routes.addItemToCart = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
+    }
+
+    if (user.package.includes(packageId)) {
+      return res.status(400).json({ error: "Item already purchased" });
     }
 
     if (user.cart.includes(packageId)) {
@@ -64,13 +68,19 @@ routes.getCart = async (req, res) => {
     //   path: "cart",
     //   select: "-bets",
     // });
-    const user = await userModel.findById(id).populate("cart", "-bets");
+    const user = await userModel.findById(id);
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
 
-    return res.status(200).json({ msg: "success", dta: user.cart });
+    user.cart = user.cart.filter((item) => !user.package.includes(item));
+
+    await user.save();
+
+    const result = await userModel.findById(id).populate("cart", "-bets");
+
+    return res.status(200).json({ msg: "success", dta: result.cart });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });
@@ -114,9 +124,7 @@ routes.createIntentCart = async (req, res) => {
     }
 
     // any purchased item in cart
-    const purchased = user.cart.find((item) => {
-      return user.package.includes(item);
-    });
+    const purchased = user.cart.find((item) => user.package.includes(item));
 
     if (purchased) {
       return res.status(400).json({ error: "Item already purchased" });

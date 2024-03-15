@@ -23,7 +23,7 @@ routes.allUsers = async (req, res) => {
       );
 
     if (email)
-      users = users.filter((user) =>
+      users = allusers.filter((user) =>
         user.email.toLowerCase().includes(email.toLowerCase())
       );
 

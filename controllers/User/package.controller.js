@@ -2,7 +2,7 @@ const userModel = require("../../models/user.model");
 const orderHistoryModel = require("../../models/orderHistory.model");
 const packageModel = require("../../models/package.model");
 
-const sendPayment = require("../../utils/sendPayment.utils");
+const sendPayment = require("../../utils/MailService/sendPayment.utils");
 
 const userValid = require("../../validations/user.joi");
 

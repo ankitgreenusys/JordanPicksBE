@@ -23,9 +23,10 @@ router.get("/getVslPackage/:id", auth, userController.getVslPackage);
 router.get("/getSpecialPackage/:id", auth, userController.getSpecialPackage);
 router.post("/contact", userController.contactUs);
 router.get("/getProfile", auth, userController.userDashboard);
-router.get("/getProfileShort", auth, userController.getWallet);
+router.get("/getProfileShort", auth, userController.getProfileShort);
 router.get("/getMyPackages", auth, userController.getMyPackages);
 router.get("/getTransactions", auth, userController.getTransactions);
+router.get("/getRecurringTransactions", auth, userController.getRecurringTransactions);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
 router.post("/validatePaymentPackage", userController.validPaymentPackage);
@@ -65,5 +66,32 @@ router.post("/createIntentCart", auth, userController.createIntentCart);
 router.post("/validatePaymentCart", userController.validPaymentCart);
 router.post("/walletWithdrawCart", auth, userController.walletWithdrawCart);
 router.get("/getReferredUsers", auth, userController.getReferredUsers);
+
+router.post(
+  "/createReccuringOrderMonthly",
+  auth,
+  userController.createReccuringOrderMonthly
+);
+router.post(
+  "/validPaymentReccuringOrderMonthly",
+  userController.validPaymentReccuringOrderMonthly
+);
+
+router.post(
+  "/createReccuringOrderYearly",
+  auth,
+  userController.createReccuringOrderYearly
+);
+
+router.post(
+  "/validPaymentReccuringOrderYearly",
+  userController.validPaymentReccuringOrderYearly
+);
+
+router.delete(
+  "/cancelRecurringOrder/:id",
+  auth,
+  userController.cancelRecurringOrder
+);
 
 module.exports = router;

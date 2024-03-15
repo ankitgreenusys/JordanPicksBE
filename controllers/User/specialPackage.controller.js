@@ -1,8 +1,9 @@
 const userModel = require("../../models/user.model");
 const orderHistoryModel = require("../../models/orderHistory.model");
 const specialPackageModel = require("../../models/specialPackage.model");
+const reccuringOrderModel = require("../../models/RecurringOrder.model");
 
-const sendPayment = require("../../utils/sendPayment.utils");
+const sendPayment = require("../../utils/MailService/sendPayment.utils");
 
 const routes = {};
 
@@ -24,7 +25,13 @@ routes.getSpecialPackage = async (req, res) => {
     const uid = req.userId;
     const id = req.params.id;
     const package = await specialPackageModel.findById(id);
-    const user = await userModel.findById(uid).populate("specialPackage");
+    const isBuied = await reccuringOrderModel.findOne({
+      userId: uid,
+      specialPackage: id,
+      status: "active",
+    });
+
+    console.log(isBuied);
 
     if (!package) {
       return res.status(404).json({ error: "package not found" });
@@ -36,10 +43,10 @@ routes.getSpecialPackage = async (req, res) => {
 
     await package.save();
 
-    const isBuied = user.specialPackage.find((item) => {
-      // console.log(item._id);
-      return item._id == id;
-    });
+    // const isBuied = user.specialPackage.find((item) => {
+    //   // console.log(item._id);
+    //   return item._id == id;
+    // });
 
     let isBought = false;
 
@@ -199,44 +206,325 @@ routes.validPaymentSpecialPackage = async (req, res) => {
   }
 };
 
-routes.buyMonthlyPackage = async (req, res) => {
+routes.createReccuringOrderMonthly = async (req, res) => {
+  const { specialPackageId, paymentMethod } = req.body;
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-  const { packageId } = req.body;
-  const id = req.userId;
+  const userId = req.userId;
+
   try {
-    // const { error } = userValid.buySpecialPackageValidation.validate(req.body);
+    const user = await userModel.findById(userId);
 
-    // if (error) {
-    //   return res.status(400).json({ error: error.details[0].message });
-    // }
-
-    const user = await userModel.findById(id);
-    const package = await specialPackageModel.findById(packageId);
-
-    // console.log(package);
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     }
+
+    const package = await specialPackageModel.findById(specialPackageId);
+
     if (!package) {
       return res.status(404).json({ error: "package not found" });
     }
 
-    if (user.specialPackage.includes(packageId)) {
-      return res.status(400).json({ error: "package already purchased" });
+    if (!paymentMethod) {
+      return res.status(404).json({ error: "payment method not found" });
     }
 
-    const amount = package.price.toFixed(2);
-
-    // reccuring payment
-
-    const customer = await stripe.customers.create({
-      email: user.email,
-      source: "tok_visa",
+    const exiting = reccuringOrderModel.findOne({
+      userId: userId,
+      specialPackage: specialPackageId,
     });
 
-    
+    if (exiting && exiting.status === "active") {
+      return res.status(400).json({ error: "order already exists" });
+    }
+    let customer;
+    console.log(paymentMethod);
 
+    // if (!user.stripeCustomerId) {
+    customer = await stripe.customers.create({
+      name: user.name,
+      email: user.email,
+      shipping: {
+        name: user.name,
+        address: {
+          line1: "510 Townsend St",
+          postal_code: "98140",
+          city: "San Francisco",
+          state: "CA",
+          country: "US",
+        },
+      },
+      payment_method: paymentMethod,
+      invoice_settings: {
+        default_payment_method: paymentMethod,
+      },
+    });
 
+    user.stripeCustomerId = customer.id;
+    await user.save();
+    // } else {
+    //   customer = await stripe.customers.retrieve(user.stripeCustomerId);
+    // }
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      currency: "usd",
+      items: [{ price: package.stripeMonthlyPriceId }],
+      payment_settings: {
+        payment_method_types: ["card"],
+        save_default_payment_method: "on_subscription",
+      },
+      expand: ["latest_invoice.payment_intent"],
+    });
+
+    await reccuringOrderModel.create({
+      userId: userId,
+      specialPackage: specialPackageId,
+      price: package.monthlyPrice,
+      stripeCustomerId: customer.id,
+      stripeSubscriptionId: subscription.id,
+      validTill: new Date(subscription.current_period_end * 1000),
+      type: "monthly",
+      paymentIntentId: subscription.latest_invoice.payment_intent.id,
+    });
+
+    console.log(subscription);
+
+    return res.status(201).json({
+      msg: "success",
+      dta: subscription.latest_invoice.payment_intent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.validPaymentReccuringOrderMonthly = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { paymentIntentId } = req.body;
+  const { id } = req.query;
+
+  try {
+    const user = await userModel.findById(id);
+    const reccuringOrder = await reccuringOrderModel.findOne({
+      userId: id,
+      paymentIntentId: paymentIntentId,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!reccuringOrder) {
+      return res.status(404).json({ error: "order not found" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status === "succeeded") {
+      // const order = await orderHistoryModel.create({
+      //   user: id,
+      //   specialPackage: reccuringOrder.specialPackageId,
+      //   status: "active",
+      //   desc: `Package - ${reccuringOrder.specialPackageId} purchased (card)`,
+      //   price: reccuringOrder.price,
+      //   type: "Debit",
+      //   method: "Card",
+      // });
+
+      user.reccuringOrder.push(reccuringOrder._id);
+      // user.orderHistory.push(order._id);
+      user.specialPackage.push(reccuringOrder.specialPackage);
+
+      // reccuringOrder.orderHistory.push(order._id);
+      reccuringOrder.status = "active";
+
+      await reccuringOrder.save();
+      await user.save();
+    }
+
+    return res.send({
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ status: "Failed" });
+  }
+};
+
+routes.createReccuringOrderYearly = async (req, res) => {
+  const { specialPackageId, paymentMethod } = req.body;
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const userId = req.userId;
+
+  try {
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    const package = await specialPackageModel.findById(specialPackageId);
+
+    if (!package) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    if (!paymentMethod) {
+      return res.status(404).json({ error: "payment method not found" });
+    }
+
+    const exiting = reccuringOrderModel.findOne({
+      userId: userId,
+      specialPackage: specialPackageId,
+    });
+
+    if (exiting && exiting.status === "active") {
+      return res.status(400).json({ error: "order already exists" });
+    }
+    let customer;
+    console.log(paymentMethod);
+
+    // if (!user.stripeCustomerId) {
+    customer = await stripe.customers.create({
+      name: user.name,
+      email: user.email,
+      shipping: {
+        name: user.name,
+        address: {
+          line1: "510 Townsend St",
+          postal_code: "98140",
+          city: "San Francisco",
+          state: "CA",
+          country: "US",
+        },
+      },
+      payment_method: paymentMethod,
+      invoice_settings: {
+        default_payment_method: paymentMethod,
+      },
+    });
+
+    user.stripeCustomerId = customer.id;
+    await user.save();
+    // } else {
+    //   customer = await stripe.customers.retrieve(user.stripeCustomerId);
+    // }
+
+    const subscription = await stripe.subscriptions.create({
+      customer: customer.id,
+      currency: "usd",
+      items: [{ price: package.stripeYearlyPriceId }],
+      payment_settings: {
+        payment_method_types: ["card"],
+        save_default_payment_method: "on_subscription",
+      },
+      expand: ["latest_invoice.payment_intent"],
+    });
+
+    await reccuringOrderModel.create({
+      userId: userId,
+      specialPackage: specialPackageId,
+      price: package.yearlyPrice,
+      stripeCustomerId: customer.id,
+      stripeSubscriptionId: subscription.id,
+      validTill: new Date(subscription.current_period_end * 1000),
+      type: "yearly",
+      paymentIntentId: subscription.latest_invoice.payment_intent.id,
+    });
+
+    console.log(subscription);
+
+    return res.status(201).json({
+      msg: "success",
+      dta: subscription.latest_invoice.payment_intent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "internal server error" });
+  }
+};
+
+routes.validPaymentReccuringOrderYearly = async (req, res) => {
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { paymentIntentId } = req.body;
+  const { id } = req.query;
+
+  try {
+    const user = await userModel.findById(id);
+    const reccuringOrder = await reccuringOrderModel.findOne({
+      userId: id,
+      paymentIntentId: paymentIntentId,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!reccuringOrder) {
+      return res.status(404).json({ error: "order not found" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status === "succeeded") {
+      // const order = await orderHistoryModel.create({
+      //   user: id,
+      //   specialPackage: reccuringOrder.specialPackageId,
+      //   status: "active",
+      //   desc: `Package - ${reccuringOrder.specialPackageId} purchased (card)`,
+      //   price: reccuringOrder.price,
+      //   type: "Debit",
+      //   method: "Card",
+      // });
+
+      user.reccuringOrder.push(reccuringOrder._id);
+      // user.orderHistory.push(order._id);
+      user.specialPackage.push(reccuringOrder.specialPackage);
+
+      // reccuringOrder.orderHistory.push(order._id);
+      reccuringOrder.status = "active";
+
+      await reccuringOrder.save();
+      await user.save();
+    }
+
+    return res.send({
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ status: "Failed" });
+  }
+};
+
+routes.cancelRecurringOrder = async (req, res) => {
+  const userId = req.userId;
+  const { id } = req.params;
+
+  try {
+    const user = await userModel.findById(userId);
+    const order = await reccuringOrderModel.findOne({
+      _id: id,
+      userId: userId,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    if (!order) {
+      return res.status(404).json({ error: "order not found" });
+    }
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+    await stripe.subscriptions.cancel(order.stripeSubscriptionId);
+
+    order.status = "inactive";
+    await order.save();
+
+    return res.status(200).json({ msg: "success" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "internal server error" });

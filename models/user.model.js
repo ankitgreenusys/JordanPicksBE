@@ -78,6 +78,12 @@ const user = mongoose.Schema({
       ref: "specialPackage",
     },
   ],
+  reccuringOrder: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "reccuringOrder",
+    },
+  ],
   orderHistory: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -90,6 +96,9 @@ const user = mongoose.Schema({
       ref: "package",
     },
   ],
+  stripeCustomerId: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: function () {

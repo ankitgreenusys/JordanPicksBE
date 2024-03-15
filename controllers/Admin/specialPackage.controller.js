@@ -1,4 +1,5 @@
 const specialPackageModel = require("../../models/specialPackage.model");
+const recurringOrderModel = require("../../models/RecurringOrder.model");
 
 const routes = {};
 
@@ -57,14 +58,11 @@ routes.addSpecialPackage = async (req, res) => {
     videoURL,
   } = req.body;
 
-  // const { error } = adminValid.addSpecialPackageValidation.validate(req.body);
-
-  // if (error) {
-  //   return res.status(400).json({ error: error.details[0].message });
-  // }
+  console.log(process.env.STRIPE_SECRET_KEY);
+  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
   try {
-    const newPackage = await specialPackageModel.create({
+    const newPackage = new specialPackageModel({
       name,
       monthlyPrice: monthlyPrice.toFixed(2) || 0,
       yearlyPrice: yearlyPrice.toFixed(2) || 0,
@@ -75,6 +73,41 @@ routes.addSpecialPackage = async (req, res) => {
       discount,
       videoURL,
     });
+
+    await newPackage.save();
+
+    const product = await stripe.products.create({
+      name: newPackage.name,
+      metadata: {
+        packageId: newPackage._id,
+      },
+      active: true,
+    });
+
+    const monthlyPriceStripe = await stripe.prices.create({
+      product: product.id,
+      unit_amount: newPackage.monthlyPrice * 100,
+      currency: "usd",
+      recurring: { interval: "monthly" },
+      metadata: {
+        packageId: newPackage._id,
+      },
+    });
+
+    const yearlyPriceStripe = await stripe.prices.create({
+      product: product.id,
+      unit_amount: newPackage.yearlyPrice * 100,
+      currency: "usd",
+      recurring: { interval: "year" },
+      metadata: {
+        packageId: newPackage._id,
+      },
+    });
+
+    newPackage.stripeProductId = product.id;
+    newPackage.stripeMonthlyPriceId = monthlyPriceStripe.id;
+    newPackage.stripeYearlyPriceId = yearlyPriceStripe.id;
+    await newPackage.save();
 
     return res.status(201).json({ msg: "success", dta: newPackage });
   } catch (error) {
@@ -143,6 +176,19 @@ routes.deleteSpecialPackage = async (req, res) => {
     if (!package) {
       return res.status(404).json({ error: "package not found" });
     }
+
+    const recurringOrders = await recurringOrderModel.find({
+      specialPackage: id,
+    });
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+    recurringOrders.forEach(async (order) => {
+      await stripe.subscriptions.cancel(order.stripeSubscriptionId);
+
+      order.status = "inactive";
+      await order.save();
+    });
 
     await specialPackageModel.findOneAndUpdate(
       { _id: id },

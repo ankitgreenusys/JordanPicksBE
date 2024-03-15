@@ -1,4 +1,5 @@
 const accountUser = require("./User/account.controller");
+const profileUser = require("./User/profile.controller");
 const cartUser = require("./User/cart.controller");
 const packageUser = require("./User/package.controller");
 const publicUser = require("./User/public.controller");
@@ -8,6 +9,7 @@ const vslPackageUser = require("./User/vslPackage.controller");
 
 const routes = {
   ...accountUser,
+  ...profileUser,
   ...cartUser,
   ...packageUser,
   ...publicUser,

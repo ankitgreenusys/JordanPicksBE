@@ -43,6 +43,15 @@ const specialPackageSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  stripeProductId: {
+    type: String,
+  },
+  stripeMonthlyPriceId: {
+    type: String,
+  },
+  stripeYearlyPriceId: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: function () {
