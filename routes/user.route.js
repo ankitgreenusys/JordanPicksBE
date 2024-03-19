@@ -26,7 +26,11 @@ router.get("/getProfile", auth, userController.userDashboard);
 router.get("/getProfileShort", auth, userController.getProfileShort);
 router.get("/getMyPackages", auth, userController.getMyPackages);
 router.get("/getTransactions", auth, userController.getTransactions);
-router.get("/getRecurringTransactions", auth, userController.getRecurringTransactions);
+router.get(
+  "/getRecurringTransactions",
+  auth,
+  userController.getRecurringTransactions
+);
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
 router.post("/validatePaymentPackage", userController.validPaymentPackage);
@@ -93,5 +97,16 @@ router.delete(
   auth,
   userController.cancelRecurringOrder
 );
+
+// -----------------------
+
+router.get("/auth/facebook", userController.facebook);
+router.get("/auth/facebook/callback", userController.facebookCallback);
+router.get("/auth/apple", userController.apple);
+router.get("/auth/apple/callback", userController.appleCallback);
+router.get("/auth/success", userController.success);
+
+router.get("/auth/google", userController.google);
+router.get("/auth/google/callback", userController.googleCallback);
 
 module.exports = router;
