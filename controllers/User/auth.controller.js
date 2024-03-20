@@ -5,11 +5,11 @@ const jwt = require("jsonwebtoken");
 const routes = {};
 
 routes.google = passport.authenticate("google", {
-  scope: ["profile", "email"],
+  scope: ["profile"],
 });
 
 routes.googleCallback = passport.authenticate("google", {
-  session: false,
+  // session: false,
   failureRedirect: "/user/auth/google",
   successRedirect: "/user/auth/success",
 });
