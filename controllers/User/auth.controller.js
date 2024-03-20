@@ -35,7 +35,7 @@ routes.appleCallback = passport.authenticate("apple", {
 routes.success = async (req, res) => {
   try {
     console.log(req.user);
-    if (req.user) {
+    if (req.user._json.name) {
       const user = req.user._json;
 
       const userExists = await userModel.findOne({ email: user.email });
@@ -103,7 +103,24 @@ routes.success = async (req, res) => {
 
         const savedUser = await newUser.save();
 
-        const token = jwt.sign({ user: savedUser._id }, process.env.JWT_SECRET);
+        const token = jwt.sign(
+          { user: savedUser._id },
+          process.env.JWT_SECRET,
+          { expiresIn: "24h" }
+        );
+        const refreshToken = jwt.sign(
+          { user: savedUser._id },
+          process.env.REFRESH_TOKEN_PRIVATE_KEY,
+          { expiresIn: "1y" }
+        );
+
+        res.redirect(
+          process.env.APP_URL +
+            "auth/social?token=" +
+            token +
+            "&refreshToken=" +
+            token
+        );
       }
     } else res.status(401).json("Unauthorized");
   } catch (err) {
