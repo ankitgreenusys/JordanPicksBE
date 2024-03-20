@@ -106,7 +106,7 @@ router.get("/auth/apple", userController.apple);
 router.get("/auth/apple/callback", userController.appleCallback);
 router.get("/auth/success", userController.success);
 
-router.get("/auth/google", userController.google);
+router.get("/auth/google", userController.google, userController.googleCallback);
 router.get("/auth/google/callback", userController.googleCallback);
 
 module.exports = router;

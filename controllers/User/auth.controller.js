@@ -9,7 +9,7 @@ routes.google = passport.authenticate("google", {
 });
 
 routes.googleCallback = passport.authenticate("google", {
-  // session: false,
+  session: false,
   failureRedirect: "/user/auth/google",
   successRedirect: "/user/auth/success",
 });
@@ -33,6 +33,10 @@ routes.appleCallback = passport.authenticate("apple", {
   failureRedirect: "/user/auth/apple",
   successRedirect: "/user/auth/success",
 });
+
+routes.redirect = (req, res) => {
+  res.redirect("/");
+};
 
 routes.success = async (req, res) => {
   try {
@@ -131,6 +135,7 @@ routes.success = async (req, res) => {
     res.status(500).json("Internal Server Error");
   }
 };
+
 routes.logout = (req, res) => {
   res.clearCookie("token");
   res.redirect(process.env.REDIRECT_URL);
