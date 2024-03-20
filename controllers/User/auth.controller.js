@@ -34,8 +34,9 @@ routes.appleCallback = passport.authenticate("apple", {
 
 routes.success = async (req, res) => {
   try {
+    console.log(req.user);
     console.log(req.user._json);
-    if (req.user._json.name) {
+    if (req.user) {
       const user = req.user._json;
 
       const userExists = await userModel.findOne({ email: user.email });
@@ -119,7 +120,7 @@ routes.success = async (req, res) => {
             "auth/social?token=" +
             token +
             "&refreshToken=" +
-            token
+            refreshToken
         );
       }
     } else res.status(401).json("Unauthorized");
