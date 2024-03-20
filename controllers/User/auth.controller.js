@@ -4,7 +4,9 @@ const jwt = require("jsonwebtoken");
 
 const routes = {};
 
-routes.google = passport.authenticate("google");
+routes.google = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
 
 routes.googleCallback = passport.authenticate("google", {
   session: false,
