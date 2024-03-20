@@ -36,7 +36,7 @@ routes.appleCallback = passport.authenticate("apple", {
 
 routes.success = async (req, res) => {
   try {
-    console.log(req.user);
+    console.log(req);
     console.log(req.user.id);
     if (req.user) {
       const user = req.user._json;
