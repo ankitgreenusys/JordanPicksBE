@@ -13,7 +13,7 @@ const emailtemplateotp = (name) => {
     </ul>
     <p>To get started, simply log in to your account and browse our selection of sports pick packages. Choose the one that suits your budget and preferences, and place your bets with confidence. You can also join the Penthouse Club Telegram Channel by clicking the link in your account dashboard.</p>
     <p>We are thrilled to have you on board and we look forward to helping you win big!</p>
-    <p>If you have any questions or feedback, please feel free to contact us at <a href="mailto:support@jordanspicks.com">support@jordanspicks.com</a>. We are always happy to hear from you.</p>
+    <p>If you have any questions or feedback, please feel free to contact us at <a href="mailto:${process.env.SUPPORT_MAIL}">${process.env.SUPPORT_MAIL}</a>. We are always happy to hear from you.</p>
     <p>Happy betting!</p>
     <p>Jordan and the Jordanspicks.com team</p>
 </div>`;
@@ -26,21 +26,22 @@ const sendOTP = async (email, otp, title) => {
       port: process.env.MAIL_PORT,
       secure: true,
       auth: {
-        user: process.env.MAIL_USER,
+        user: process.env.MAIL_EMAIL,
         pass: process.env.MAIL_PASSWORD,
         // refreshToken: process.env.REFRESH_TOKEN,
       },
     });
 
     const mailOptions = {
-      from: process.env.MAIL_EMAIL,
+      from: { name: process.env.MAIL_USER, address: process.env.MAIL_EMAIL },
+      // user: process.env.MAIL_EMAIL,
       to: email,
       subject: title,
       html: emailtemplateotp(otp),
     };
 
     const result = await transporter.sendMail(mailOptions);
-    // console.log(result);
+    console.log(result);
     return result;
   } catch (error) {
     console.log(error);
