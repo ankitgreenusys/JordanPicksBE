@@ -5,8 +5,6 @@ const auth = require("../middlewares/user.middleware");
 const router = Express.Router();
 
 router.post("/signup", userController.createUser);
-// router.post("/verify", userController.verifyOTP);
-// router.get("/resendotp/:id", userController.resendOtp);
 router.post("/refreshtoken", userController.refreshAccessToken);
 router.get("/getBonus", auth, userController.getBonus);
 router.post("/login", userController.login);

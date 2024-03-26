@@ -62,25 +62,30 @@ routes.addSpecialPackage = async (req, res) => {
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
   try {
-    const newPackage = new specialPackageModel({
+    const newPackage = await specialPackageModel.create({
       name,
-      monthlyPrice: monthlyPrice.toFixed(2) || 0,
-      yearlyPrice: yearlyPrice.toFixed(2) || 0,
+      monthlyPrice: parseFloat(monthlyPrice).toFixed(2) || 0,
+      yearlyPrice: parseFloat(yearlyPrice).toFixed(2) || 0,
       description,
-      price,
       gamePreview,
+      price,
       links,
       discount,
       videoURL,
     });
 
-    await newPackage.save();
+    // convert to object
+
+    //get the id of the package as string
+
+    const packageId = newPackage.toObject()._id.toString();
 
     const product = await stripe.products.create({
       name: newPackage.name,
       metadata: {
-        packageId: newPackage._id,
+        packageId: packageId,
       },
+
       active: true,
     });
 
@@ -88,9 +93,9 @@ routes.addSpecialPackage = async (req, res) => {
       product: product.id,
       unit_amount: newPackage.monthlyPrice * 100,
       currency: "usd",
-      recurring: { interval: "monthly" },
+      recurring: { interval: "month" },
       metadata: {
-        packageId: newPackage._id,
+        packageId: packageId,
       },
     });
 
@@ -100,7 +105,7 @@ routes.addSpecialPackage = async (req, res) => {
       currency: "usd",
       recurring: { interval: "year" },
       metadata: {
-        packageId: newPackage._id,
+        packageId: packageId,
       },
     });
 
@@ -130,26 +135,59 @@ routes.updateSpecialPackage = async (req, res) => {
     videoURL,
   } = req.body;
 
-  // const { error } = adminValid.updateSpecialPackageValidation.validate(
-  //   req.body
-  // );
-
-  // if (error) {
-  //   return res.status(400).json({ error: error.details[0].message });
-  // }
-
   try {
     const package = await specialPackageModel.findById(id);
     if (!package) {
       return res.status(404).json({ error: "package not found" });
     }
 
+    if (package.isDeleted) {
+      return res.status(404).json({ error: "package not found" });
+    }
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+    if (package.monthlyPrice != monthlyPrice) {
+      const newMonthlyPrice = await stripe.prices.create({
+        product: package.stripeProductId,
+        unit_amount: monthlyPrice * 100,
+        currency: "usd",
+        recurring: { interval: "month" },
+      });
+
+      await stripe.prices.update(package.stripeMonthlyPriceId, {
+        active: false,
+      });
+
+      package.stripeMonthlyPriceId = newMonthlyPrice.id;
+    }
+
+    if (package.yearlyPrice != yearlyPrice) {
+      const newYearlyPrice = await stripe.prices.create({
+        product: package.stripeProductId,
+        unit_amount: yearlyPrice * 100,
+        currency: "usd",
+        recurring: { interval: "year" },
+      });
+
+      await stripe.prices.update(package.stripeYearlyPriceId, {
+        active: false,
+      });
+
+      package.stripeYearlyPriceId = newYearlyPrice.id;
+    }
+
+    if (package.name != name) {
+      await stripe.products.update(package.stripeProductId, {
+        name,
+      });
+    }
+
     const updatedPackage = await specialPackageModel.findOneAndUpdate(
       { _id: id },
       {
         name,
-        monthlyPrice: monthlyPrice.toFixed(2) || 0,
-        yearlyPrice: yearlyPrice.toFixed(2) || 0,
+        monthlyPrice: parseFloat(monthlyPrice).toFixed(2) || 0,
+        yearlyPrice: parseFloat(yearlyPrice).toFixed(2) || 0,
         description,
         gamePreview,
         price,
@@ -204,7 +242,7 @@ routes.deleteSpecialPackage = async (req, res) => {
 };
 
 routes.deletedSpecialPackage = async (req, res) => {
-  const { page } = req.query;
+  const { page = 1 } = req.query;
 
   try {
     const packages = await specialPackageModel.find({ isDeleted: true });
