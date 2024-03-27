@@ -7,7 +7,7 @@ const adminValid = require("../../validations/admin.joi");
 const routes = {};
 
 routes.allPackages = async (req, res) => {
-  const { page } = req.query;
+  const { page = 1 } = req.query;
 
   try {
     const packages = await packageModel.find({
@@ -35,7 +35,7 @@ routes.allPackages = async (req, res) => {
 };
 
 routes.pastPackages = async (req, res) => {
-  const { page } = req.query;
+  const { page = 1 } = req.query;
 
   try {
     const packages = await packageModel
@@ -105,10 +105,12 @@ routes.addPackage = async (req, res) => {
     return res.status(400).json({ error: error.details[0].message });
   }
 
+  const pri = parseFloat(price);
+
   try {
     const newPackage = await packageModel.create({
       name,
-      price: price.toFixed(2),
+      price: pri.toFixed(2),
       endDate,
       description,
       gamePreview,
@@ -164,36 +166,7 @@ routes.updatePackageStatus = async (req, res) => {
         user.add(order.user._id);
       });
 
-      // set to array
       const uniqueuser = Array.from(user);
-
-      // user.forEach(async (order) => {
-
-      //   if (user.has(order.user._id)) {
-      //     return;
-      //   }
-      //   await userModel.findOneAndUpdate(
-      //     { _id: order.user },
-      //     { $inc: { wallet: order.package.price } },
-      //     { new: true }
-      //   );
-
-      //   const newOrder = await orderHistoryModel.create({
-      //     user: order.user,
-      //     package: order.package,
-      //     status: "inactive",
-      //     desc: "wallet credited",
-      //     price: order.package.price,
-      //   });
-
-      //   await userModel.findOneAndUpdate(
-      //     { _id: order.user },
-      //     { $push: { orderHistory: newOrder._id } },
-      //     { new: true }
-      //   );
-
-      //   user.add(order.user._id);
-      // });
 
       uniqueuser.forEach(async (userId) => {
         await userModel.findOneAndUpdate(
@@ -278,11 +251,13 @@ routes.updatePackage = async (req, res) => {
       return res.status(404).json({ error: "package not found" });
     }
 
+    const pri = parseFloat(price);
+
     const updatedPackage = await packageModel.findOneAndUpdate(
       { _id: id },
       {
         name,
-        price: price.toFixed(2),
+        price: pri.toFixed(2),
         endDate,
         description,
         gamePreview,
@@ -327,7 +302,7 @@ routes.deletePackage = async (req, res) => {
 };
 
 routes.deletedPackages = async (req, res) => {
-  const { page } = req.query;
+  const { page = 1 } = req.query;
 
   try {
     const packages = await packageModel.find({ isDeleted: true });

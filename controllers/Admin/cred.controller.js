@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const adminModel = require("../../models/admin.model");
+const bcrypt = require("bcryptjs");
 
 const adminValid = require("../../validations/admin.joi");
 
@@ -21,7 +22,14 @@ routes.createUser = async (req, res) => {
       return res.status(404).json({ error: "email already exists" });
     }
 
-    const newUser = await adminModel.create({ email, name, password });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await adminModel.create({
+      email,
+      name,
+      password: hashedPassword,
+    });
 
     return res.status(201).json({ msg: "success", dta: newUser });
   } catch (error) {
@@ -46,12 +54,14 @@ routes.login = async (req, res) => {
       return res.status(404).json({ error: "email not found" });
     }
 
-    if (user.password !== password) {
-      return res.status(404).json({ error: "password incorrect" });
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res.status(404).json({ error: "invalid password" });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: "1y",
     });
 
     return res.status(201).json({ msg: "success", dta: token });

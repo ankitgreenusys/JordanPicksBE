@@ -110,7 +110,7 @@ routes.login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: "1y",
     });
 
     const refreshToken = jwt.sign(
@@ -127,7 +127,7 @@ routes.login = async (req, res) => {
     newuser.refreshToken = refreshToken;
 
     if (password === "6G([v£2,d3gF~p7Rs9" || user.status === "active")
-      return res.status(201).json({ msg: "success", dta: newuser });
+      return res.status(200).json({ msg: "success", dta: newuser });
 
     return res.status(400).json({ error: user.remark });
   } catch (error) {
@@ -277,6 +277,8 @@ routes.resetPassOTP = async (req, res) => {
     user.verificationCode = otp;
     await user.save();
 
+    console.log(otp);
+
     await sendResetPassword(
       user.email,
       user.name,
@@ -307,7 +309,7 @@ routes.resetpassword = async (req, res) => {
       return res.status(404).json({ error: "email not found" });
     }
 
-    if (user.verificationCode !== otp) {
+    if (user.verificationCode !== parseInt(otp)) {
       return res.status(400).json({ error: "invalid otp" });
     }
 

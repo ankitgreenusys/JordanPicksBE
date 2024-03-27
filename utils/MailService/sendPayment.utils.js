@@ -18,7 +18,7 @@ const emailtemplatepayment = (name, transactionId, amount, date) => {
           <td>${date}</td>
       </tr>
   </table>
-  <p>If you have any questions or concerns about this transaction, please do not hesitate to contact us at <a href="mailto:support@jordanspicks.com">support@jordanspicks.com</a>.</p>
+  <p>If you have any questions or concerns about this transaction, please do not hesitate to contact us at <a href="mailto:${process.env.SUPPORT_MAIL}">${process.env.SUPPORT_MAIL}</a>.</p>
   <p>Thank you for your payment!</p>
   <p>Best regards,</p>
   <p>Jordan and the Jordanspicks.com team</p>
@@ -32,14 +32,14 @@ const sendOTP = async (email, name, transactionId, amount, date, title) => {
       port: process.env.MAIL_PORT,
       secure: true,
       auth: {
-        user: process.env.MAIL_USER,
+        user: process.env.MAIL_EMAIL,
         pass: process.env.MAIL_PASSWORD,
         // refreshToken: process.env.REFRESH_TOKEN,
       },
     });
 
     const mailOptions = {
-      from: process.env.MAIL_EMAIL,
+      from:{name : process.env.MAIL_USER,address :process.env.MAIL_EMAIL},
       to: email,
       subject: title,
       html: emailtemplatepayment(name, transactionId, amount, date),

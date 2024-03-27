@@ -60,7 +60,7 @@ routes.addStore = async (req, res) => {
   try {
     const newStore = await storeModel.create({
       name,
-      price: price.toFixed(2) || 0,
+      price: parseFloat(price).toFixed(2) || 0,
       credits,
     });
 
@@ -91,7 +91,7 @@ routes.updateStore = async (req, res) => {
       { _id: id },
       {
         name,
-        price: price.toFixed(2) || 0,
+        price: parseFloat(price).toFixed(2) || 0,
         credits,
       },
       { new: true }
