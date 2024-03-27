@@ -19,7 +19,10 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000,
   })
 );
+
 app.set("trust proxy", true);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));

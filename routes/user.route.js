@@ -1,6 +1,7 @@
 const Express = require("express");
 const userController = require("../controllers/user.controller");
 const auth = require("../middlewares/user.middleware");
+const passport = require("passport");
 
 const router = Express.Router();
 
@@ -100,13 +101,13 @@ router.delete(
 
 // -----------------------
 
-router.get("/auth/facebook", userController.facebook);
-router.get("/auth/facebook/callback", userController.facebookCallback);
-router.get("/auth/apple", userController.apple);
-router.get("/auth/apple/callback", userController.appleCallback);
+// router.get("/auth/facebook", userController.facebook);
+// router.get("/auth/facebook/callback", userController.facebookCallback);
+// router.get("/auth/apple", userController.apple);
+// router.get("/auth/apple/callback", userController.appleCallback);
 router.get("/auth/success", userController.success);
 
-router.get("/auth/google", userController.google, userController.redirect);
+router.get("/auth/google", userController.google);
 router.get("/auth/google/callback", userController.googleCallback);
 
 module.exports = router;
