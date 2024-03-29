@@ -97,6 +97,25 @@ router.delete(
   userController.cancelRecurringOrder
 );
 
+// New Payment Routes
+router.post("/buyPackageAuthorize", auth, userController.buyPackageAuthorize);
+router.post("/buyStoreAuthorize", auth, userController.buyStoreAuthorize);
+router.post(
+  "/createReccuringOrderMonthlyAuthorize",
+  auth,
+  userController.createReccuringOrderMonthlyAuthorize
+);
+router.post(
+  "/createReccuringOrderYearlyAuthorize",
+  auth,
+  userController.createReccuringOrderYearlyAuthorize
+);
+router.delete(
+  "/cancelRecurringOrderAuthorize/:id",
+  auth,
+  userController.cancelRecurringOrderAuthorize
+);
+router.post("/paymentCartAuthorize", auth, userController.paymentCartAuthorize);
 // -----------------------
 
 // router.get("/auth/facebook", userController.facebook);

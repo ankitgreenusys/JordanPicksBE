@@ -51,6 +51,7 @@ const startserver = () => {
   try {
     app.listen(PORT, () => {
       initializeTask();
+      console.log("Change admin pass");
       console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
