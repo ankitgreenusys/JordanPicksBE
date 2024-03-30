@@ -4,6 +4,7 @@ const packageModel = require("../../models/package.model");
 
 const sendPayment = require("../../utils/MailService/sendPayment.utils");
 const oneTimePayment = require("../../utils/Payment/Authorize/oneTimePayment.utils");
+const RSA_Decryption = require("../../utils/CipherText/RSA_Decryption.utils");
 
 const userValid = require("../../validations/user.joi");
 
@@ -285,18 +286,15 @@ routes.walletWithdrawPackage = async (req, res) => {
 
 routes.buyPackageAuthorize = async (req, res) => {
   try {
-    const {
-      cardNumber,
-      cardExpiryDate,
-      cardCvc,
-      packageId,
-      walletDeduction,
-      cardDeduction,
-    } = req.body;
+    const { encryptedCardDetails, packageId, walletDeduction, cardDeduction } =
+      req.body;
     const id = req.userId;
 
     const user = await userModel.findById(id);
     const package = await packageModel.findById(packageId);
+
+    const [cardNumber, cardExpiryDate, cardCvc] =
+      RSA_Decryption(encryptedCardDetails).split(",");
 
     const cardDetails = {
       number: cardNumber,

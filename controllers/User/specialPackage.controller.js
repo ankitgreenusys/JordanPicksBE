@@ -6,6 +6,7 @@ const reccuringOrderModel = require("../../models/RecurringOrder.model");
 const sendPayment = require("../../utils/MailService/sendPayment.utils");
 const recurringMonthly = require("../../utils/Payment/Authorize/recurringMonthly.utils");
 const cancelRecurringOrder = require("../../utils/Payment/Authorize/cancelRecurring.utils");
+const RSA_Decryption = require("../../utils/CipherText/RSA_Decryption.utils");
 
 const routes = {};
 
@@ -536,7 +537,7 @@ routes.cancelRecurringOrder = async (req, res) => {
 };
 
 routes.createReccuringOrderMonthlyAuthorize = async (req, res) => {
-  const { specialPackageId, cardNumber, cardExpiryDate, cardCvc } = req.body;
+  const { specialPackageId, encryptedCardDetails } = req.body;
   const userId = req.userId;
 
   try {
@@ -548,12 +549,15 @@ routes.createReccuringOrderMonthlyAuthorize = async (req, res) => {
 
     const package = await specialPackageModel.findById(specialPackageId);
 
+    const [cardNumber, cardExpiryDate, cardCvc] =
+      RSA_Decryption(encryptedCardDetails).split(",");
+
     const cardDetails = {
       number: cardNumber,
       expiryDate: cardExpiryDate,
       cvc: cardCvc,
     };
-    console.log(package)
+    console.log(package);
     if (!package) {
       return res.status(404).json({ error: "package not found" });
     }
@@ -598,7 +602,7 @@ routes.createReccuringOrderMonthlyAuthorize = async (req, res) => {
 };
 
 routes.createReccuringOrderYearlyAuthorize = async (req, res) => {
-  const { specialPackageId, cardNumber, cardExpiryDate, cardCvc } = req.body;
+  const { specialPackageId, encryptedCardDetails } = req.body;
   const userId = req.userId;
 
   try {
@@ -609,6 +613,9 @@ routes.createReccuringOrderYearlyAuthorize = async (req, res) => {
     }
 
     const package = await specialPackageModel.findById(specialPackageId);
+
+    const [cardNumber, cardExpiryDate, cardCvc] =
+      RSA_Decryption(encryptedCardDetails).split(",");
 
     const cardDetails = {
       number: cardNumber,

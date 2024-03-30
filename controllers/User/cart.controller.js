@@ -3,7 +3,8 @@ const orderHistoryModel = require("../../models/orderHistory.model");
 
 const sendPayment = require("../../utils/MailService/sendPayment.utils");
 const oneTimePayment = require("../../utils/Payment/Authorize/oneTimePayment.utils");
-const { use } = require("passport");
+const RSA_Decryption = require("../../utils/CipherText/RSA_Decryption.utils");
+
 
 const routes = {};
 
@@ -305,17 +306,14 @@ routes.walletWithdrawCart = async (req, res) => {
 };
 
 routes.paymentCartAuthorize = async (req, res) => {
-  const {
-    cardNumber,
-    cardExpiryDate,
-    cardCvc,
-    walletDeduction,
-    cardDeduction,
-  } = req.body;
+  const { encryptedCardDetails, walletDeduction, cardDeduction } = req.body;
   const id = req.userId;
 
   try {
     const user = await userModel.findById(id).populate("cart");
+
+    const [cardNumber, cardExpiryDate, cardCvc] =
+      RSA_Decryption(encryptedCardDetails).split(",");
 
     const cardDetails = {
       number: cardNumber,

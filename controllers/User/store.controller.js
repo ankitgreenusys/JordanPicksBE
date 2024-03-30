@@ -4,6 +4,7 @@ const storeModel = require("../../models/store.model");
 
 const sendPayment = require("../../utils/MailService/sendPayment.utils");
 const oneTimePayment = require("../../utils/Payment/Authorize/oneTimePayment.utils");
+const RSA_Decryption = require("../../utils/CipherText/RSA_Decryption.utils");
 
 const routes = {};
 
@@ -173,12 +174,15 @@ routes.validPaymentStore = async (req, res) => {
 };
 
 routes.buyStoreAuthorize = async (req, res) => {
-  const { cardNumber, cardExpiryDate, cardCvc, storeId } = req.body;
+  const { encryptedCardDetails, storeId } = req.body;
   const id = req.userId;
 
   try {
     const user = await userModel.findById(id);
     const store = await storeModel.findById(storeId);
+
+    const [cardNumber, cardExpiryDate, cardCvc] =
+      RSA_Decryption(encryptedCardDetails).split(",");
 
     const cardDetails = {
       number: cardNumber,
