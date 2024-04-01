@@ -207,7 +207,7 @@ routes.validPaymentPackage = async (req, res) => {
         package.name,
         package.price.toFixed(2),
         order.createdAt,
-        "JordansPicks - Payment Confirmation"
+        "JordansPicks - Payment Confirmation",
       );
     }
 
@@ -226,7 +226,7 @@ routes.walletWithdrawPackage = async (req, res) => {
     const { packageId, amount } = req.body;
 
     const { error } = userValid.walletWithdrawPackageValidation.validate(
-      req.body
+      req.body,
     );
 
     if (error) {
@@ -274,7 +274,7 @@ routes.walletWithdrawPackage = async (req, res) => {
       package.name,
       amount.toFixed(2),
       newOrder.createdAt,
-      "JordansPicks - Payment Confirmation"
+      "JordansPicks - Payment Confirmation",
     );
 
     return res.status(200).json({ msg: "success", dta: user });
@@ -385,7 +385,7 @@ routes.buyPackageAuthorize = async (req, res) => {
       package.name,
       package.price.toFixed(2),
       order.createdAt,
-      "JordansPicks - Payment Confirmation"
+      "JordansPicks - Payment Confirmation",
     );
 
     return res.send({

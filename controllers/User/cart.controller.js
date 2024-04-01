@@ -5,7 +5,6 @@ const sendPayment = require("../../utils/MailService/sendPayment.utils");
 const oneTimePayment = require("../../utils/Payment/Authorize/oneTimePayment.utils");
 const RSA_Decryption = require("../../utils/CipherText/RSA_Decryption.utils");
 
-
 const routes = {};
 
 routes.addItemToCart = async (req, res) => {
@@ -238,7 +237,7 @@ routes.validPaymentCart = async (req, res) => {
         "Cart",
         cardDeduction,
         order.createdAt,
-        "JordansPicks - Payment Confirmation"
+        "JordansPicks - Payment Confirmation",
       );
     }
 
@@ -295,7 +294,7 @@ routes.walletWithdrawCart = async (req, res) => {
       "Cart",
       amount,
       order.createdAt,
-      "JordansPicks - Payment Confirmation"
+      "JordansPicks - Payment Confirmation",
     );
 
     return res.status(200).json({ msg: "success" });
@@ -402,7 +401,7 @@ routes.paymentCartAuthorize = async (req, res) => {
       "Cart",
       cardDeduction,
       order.createdAt,
-      "JordansPicks - Payment Confirmation"
+      "JordansPicks - Payment Confirmation",
     );
     return res.send({
       msg: "success",

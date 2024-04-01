@@ -160,7 +160,7 @@ routes.validPaymentStore = async (req, res) => {
         store.name,
         store.price.toFixed(2),
         order.createdAt,
-        "JordansPicks - Payment Confirmation"
+        "JordansPicks - Payment Confirmation",
       );
     }
 
@@ -243,7 +243,7 @@ routes.buyStoreAuthorize = async (req, res) => {
       store.name,
       store.price.toFixed(2),
       order.createdAt,
-      "JordansPicks - Payment Confirmation"
+      "JordansPicks - Payment Confirmation",
     );
 
     return res.send({

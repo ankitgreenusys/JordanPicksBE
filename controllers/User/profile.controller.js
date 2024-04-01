@@ -81,7 +81,7 @@ routes.getProfileShort = async (req, res) => {
       .populate("specialPackage");
 
     const act = activeSpecialPackage.filter(
-      (ele) => !ele.specialPackage.isDeleted
+      (ele) => !ele.specialPackage.isDeleted,
     );
     let maxdis = 0;
 

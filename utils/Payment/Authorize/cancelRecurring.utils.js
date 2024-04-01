@@ -6,7 +6,7 @@ const cancelSubscription = (subscriptionId) => {
     new ApiContracts.MerchantAuthenticationType();
   merchantAuthenticationType.setName(process.env.AUTHORIZE_API_LOGIN_KEY);
   merchantAuthenticationType.setTransactionKey(
-    process.env.AUTHORIZE_API_TRANSACTION_KEY
+    process.env.AUTHORIZE_API_TRANSACTION_KEY,
   );
 
   const cancelRequest = new ApiContracts.ARBCancelSubscriptionRequest();
@@ -16,14 +16,14 @@ const cancelSubscription = (subscriptionId) => {
   console.log(JSON.stringify(cancelRequest.getJSON(), null, 2));
 
   const ctrl = new ApiControllers.ARBCancelSubscriptionController(
-    cancelRequest.getJSON()
+    cancelRequest.getJSON(),
   );
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
       const apiResponse = ctrl.getResponse();
       const response = new ApiContracts.ARBCancelSubscriptionResponse(
-        apiResponse
+        apiResponse,
       );
 
       console.log(JSON.stringify(response, null, 2));

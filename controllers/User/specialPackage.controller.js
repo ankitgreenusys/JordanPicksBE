@@ -196,7 +196,7 @@ routes.validPaymentSpecialPackage = async (req, res) => {
         package.name,
         package.price.toFixed(2),
         order.createdAt,
-        "JordansPicks - Payment Confirmation"
+        "JordansPicks - Payment Confirmation",
       );
     }
 

@@ -11,8 +11,8 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
       return done(null, profile);
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {

@@ -28,7 +28,7 @@ router.get("/getTransactions", auth, userController.getTransactions);
 router.get(
   "/getRecurringTransactions",
   auth,
-  userController.getRecurringTransactions
+  userController.getRecurringTransactions,
 );
 router.patch("/updateProfile", auth, userController.updateProfile);
 router.post("/createIntentPackage", auth, userController.buyPackage);
@@ -37,28 +37,28 @@ router.post("/createIntentVslPackage", auth, userController.buyVslPackage);
 router.post(
   "/validatePaymentVslPackage",
   auth,
-  userController.validPaymentVslPackage
+  userController.validPaymentVslPackage,
 );
 router.post(
   "/walletWithdrawPackage",
   auth,
-  userController.walletWithdrawPackage
+  userController.walletWithdrawPackage,
 );
 router.post(
   "/walletWithdrawVslPackage",
   auth,
-  userController.walletWithdrawVslPackage
+  userController.walletWithdrawVslPackage,
 );
 router.post("/createIntentStore", auth, userController.buyStore);
 router.post("/validatePaymentStore", userController.validPaymentStore);
 router.post(
   "/createIntentSpecialPackage",
   auth,
-  userController.buySpecialPackage
+  userController.buySpecialPackage,
 );
 router.post(
   "/validatePaymentSpecialPackage",
-  userController.validPaymentSpecialPackage
+  userController.validPaymentSpecialPackage,
 );
 
 router.post("/addItemToCart", auth, userController.addItemToCart);
@@ -73,28 +73,28 @@ router.get("/getReferredUsers", auth, userController.getReferredUsers);
 router.post(
   "/createReccuringOrderMonthly",
   auth,
-  userController.createReccuringOrderMonthly
+  userController.createReccuringOrderMonthly,
 );
 router.post(
   "/validPaymentReccuringOrderMonthly",
-  userController.validPaymentReccuringOrderMonthly
+  userController.validPaymentReccuringOrderMonthly,
 );
 
 router.post(
   "/createReccuringOrderYearly",
   auth,
-  userController.createReccuringOrderYearly
+  userController.createReccuringOrderYearly,
 );
 
 router.post(
   "/validPaymentReccuringOrderYearly",
-  userController.validPaymentReccuringOrderYearly
+  userController.validPaymentReccuringOrderYearly,
 );
 
 router.delete(
   "/cancelRecurringOrder/:id",
   auth,
-  userController.cancelRecurringOrder
+  userController.cancelRecurringOrder,
 );
 
 // New Payment Routes
@@ -103,17 +103,17 @@ router.post("/buyStoreAuthorize", auth, userController.buyStoreAuthorize);
 router.post(
   "/createReccuringOrderMonthlyAuthorize",
   auth,
-  userController.createReccuringOrderMonthlyAuthorize
+  userController.createReccuringOrderMonthlyAuthorize,
 );
 router.post(
   "/createReccuringOrderYearlyAuthorize",
   auth,
-  userController.createReccuringOrderYearlyAuthorize
+  userController.createReccuringOrderYearlyAuthorize,
 );
 router.delete(
   "/cancelRecurringOrderAuthorize/:id",
   auth,
-  userController.cancelRecurringOrderAuthorize
+  userController.cancelRecurringOrderAuthorize,
 );
 router.post("/paymentCartAuthorize", auth, userController.paymentCartAuthorize);
 // -----------------------

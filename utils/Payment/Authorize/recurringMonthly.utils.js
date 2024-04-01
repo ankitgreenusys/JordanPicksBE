@@ -7,7 +7,7 @@ const recurringMonthly = (cardDetails, product, user) => {
     new ApiContracts.MerchantAuthenticationType();
   merchantAuthenticationType.setName(process.env.AUTHORIZE_API_LOGIN_KEY);
   merchantAuthenticationType.setTransactionKey(
-    process.env.AUTHORIZE_API_TRANSACTION_KEY
+    process.env.AUTHORIZE_API_TRANSACTION_KEY,
   );
 
   console.log(cardDetails, product, user);
@@ -60,14 +60,14 @@ const recurringMonthly = (cardDetails, product, user) => {
   createRequest.setSubscription(arbSubscription);
 
   const ctrl = new ApiControllers.ARBCreateSubscriptionController(
-    createRequest.getJSON()
+    createRequest.getJSON(),
   );
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
       const apiResponse = ctrl.getResponse();
       const response = new ApiContracts.ARBCreateSubscriptionResponse(
-        apiResponse
+        apiResponse,
       );
 
       console.log(JSON.stringify(response, null, 2));
