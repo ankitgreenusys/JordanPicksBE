@@ -199,7 +199,7 @@ routes.buyStoreAuthorize = async (req, res) => {
     }
 
     try {
-      await oneTimePayment(cardDetails, store, store.price.toFixed(2));
+      await oneTimePayment(cardDetails, store, store.price.toFixed(2), user);
     } catch (error) {
       return res.status(400).json({ error });
     }

@@ -24,6 +24,9 @@ const sendResetPassword = async (email, name, otp, title) => {
         pass: process.env.MAIL_PASSWORD,
         // refreshToken: process.env.REFRESH_TOKEN,
       },
+      tls: {
+        ciphers: "SSLv3",
+      },
     });
 
     const mailOptions = {

@@ -2,7 +2,7 @@ const authorizenet = require("authorizenet");
 const ApiContracts = authorizenet.APIContracts;
 const ApiControllers = authorizenet.APIControllers;
 
-const oneTimePayment = (cardDetails, product, cardDeduction) => {
+const oneTimePayment = (cardDetails, product, cardDeduction, user) => {
   const merchantAuthenticationType =
     new ApiContracts.MerchantAuthenticationType();
 
@@ -26,6 +26,26 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
     `INV-JP-${Math.floor(Math.random() * 1000000)}`
   );
   orderDetails.setDescription(product.name);
+
+  const billTo = new ApiContracts.CustomerAddressType();
+  billTo.setFirstName(user.name);
+  billTo.setLastName(".");
+  billTo.setAddress(user.address);
+  billTo.setCity(user.city);
+  billTo.setState(user.state);
+  billTo.setZip(user.zip);
+  billTo.setCountry(user.country);
+  if (user.company) billTo.setCompany(user.company);
+
+  const shipTo = new ApiContracts.CustomerAddressType();
+  shipTo.setFirstName(user.name);
+  shipTo.setLastName(".");
+  shipTo.setAddress(user.address);
+  shipTo.setCity(user.city);
+  shipTo.setState(user.state);
+  shipTo.setZip(user.zip);
+  shipTo.setCountry(user.country);
+  if (user.company) shipTo.setCompany(user.company);
 
   const Item = new ApiContracts.LineItemType();
   Item.setItemId(product._id);
@@ -59,6 +79,9 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
   transactionRequestType.setAmount(parseFloat(cardDeduction).toFixed(2));
   transactionRequestType.setOrder(orderDetails);
   transactionRequestType.setTransactionSettings(transactionSettings);
+  // transactionRequestType.setLineItems(lineItems);
+  transactionRequestType.setBillTo(billTo);
+  transactionRequestType.setShipTo(shipTo);
 
   const createRequest = new ApiContracts.CreateTransactionRequest();
   createRequest.setMerchantAuthentication(merchantAuthenticationType);
@@ -70,7 +93,7 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
   //set environment to sandbox
   // ctrl.setEnvironment("https://apitest.authorize.net/xml/v1/request.api");
   // set environment to production
-  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+  // ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {

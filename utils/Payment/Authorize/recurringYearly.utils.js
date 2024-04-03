@@ -42,6 +42,12 @@ const recurringYearly = (cardDetails, product, user) => {
   const nameAndAddressType = new ApiContracts.NameAndAddressType();
   nameAndAddressType.setFirstName(user.name);
   nameAndAddressType.setLastName(".");
+  nameAndAddressType.setAddress(user.address);
+  nameAndAddressType.setCity(user.city);
+  nameAndAddressType.setState(user.state);
+  nameAndAddressType.setZip(user.zip);
+  nameAndAddressType.setCountry(user.country);
+  if (user.company) nameAndAddressType.setCompany(user.company);
 
   const arbSubscription = new ApiContracts.ARBSubscriptionType();
   arbSubscription.setName("Sample Subscription");
@@ -62,7 +68,7 @@ const recurringYearly = (cardDetails, product, user) => {
     createRequest.getJSON()
   );
 
-  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+  // ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {

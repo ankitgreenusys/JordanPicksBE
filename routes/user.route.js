@@ -31,6 +31,7 @@ router.get(
   userController.getRecurringTransactions,
 );
 router.patch("/updateProfile", auth, userController.updateProfile);
+router.patch("/updateAddress", auth, userController.updateAddress);
 router.post("/createIntentPackage", auth, userController.buyPackage);
 router.post("/validatePaymentPackage", userController.validPaymentPackage);
 router.post("/createIntentVslPackage", auth, userController.buyVslPackage);

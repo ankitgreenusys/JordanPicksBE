@@ -344,7 +344,7 @@ routes.paymentCartAuthorize = async (req, res) => {
     }
 
     try {
-      await oneTimePayment(cardDetails, user.cart[0], cardDeduction);
+      await oneTimePayment(cardDetails, user.cart[0], cardDeduction, user);
     } catch (error) {
       return res.status(400).json({ error });
     }
