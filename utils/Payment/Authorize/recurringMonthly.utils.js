@@ -69,7 +69,7 @@ const recurringMonthly = (cardDetails, product, user) => {
     createRequest.getJSON(),
   );
 
-  // ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {

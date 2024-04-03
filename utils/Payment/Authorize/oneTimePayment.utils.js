@@ -93,7 +93,7 @@ const oneTimePayment = (cardDetails, product, cardDeduction, user) => {
   //set environment to sandbox
   // ctrl.setEnvironment("https://apitest.authorize.net/xml/v1/request.api");
   // set environment to production
-  // ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
