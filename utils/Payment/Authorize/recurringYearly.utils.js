@@ -7,10 +7,10 @@ const recurringYearly = (cardDetails, product, user) => {
     new ApiContracts.MerchantAuthenticationType();
   merchantAuthenticationType.setName(process.env.AUTHORIZE_API_LOGIN_KEY);
   merchantAuthenticationType.setTransactionKey(
-    process.env.AUTHORIZE_API_TRANSACTION_KEY,
+    process.env.AUTHORIZE_API_TRANSACTION_KEY
   );
 
-  console.log(cardDetails, product, user);
+  // console.log(cardDetails, product, user);
 
   const interval = new ApiContracts.PaymentScheduleType.Interval();
   interval.setLength(12);
@@ -59,14 +59,16 @@ const recurringYearly = (cardDetails, product, user) => {
   createRequest.setSubscription(arbSubscription);
 
   const ctrl = new ApiControllers.ARBCreateSubscriptionController(
-    createRequest.getJSON(),
+    createRequest.getJSON()
   );
+
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
       const apiResponse = ctrl.getResponse();
       const response = new ApiContracts.ARBCreateSubscriptionResponse(
-        apiResponse,
+        apiResponse
       );
 
       console.log(JSON.stringify(response, null, 2));
@@ -77,7 +79,9 @@ const recurringYearly = (cardDetails, product, user) => {
           ApiContracts.MessageTypeEnum.OK
         )
           resolve(response.getSubscriptionId());
-        else reject(response.getMessages().getMessage()[0].getText());
+        else {
+          reject(response.getMessages().getMessage()[0].getText());
+        }
       } else {
         reject("Null response received");
       }

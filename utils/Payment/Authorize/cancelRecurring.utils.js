@@ -19,6 +19,8 @@ const cancelSubscription = (subscriptionId) => {
     cancelRequest.getJSON(),
   );
 
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
       const apiResponse = ctrl.getResponse();

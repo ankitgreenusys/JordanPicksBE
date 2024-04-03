@@ -10,7 +10,7 @@ const recurringMonthly = (cardDetails, product, user) => {
     process.env.AUTHORIZE_API_TRANSACTION_KEY,
   );
 
-  console.log(cardDetails, product, user);
+  // console.log(cardDetails, product, user);
 
   // Monthly subscription
   const interval = new ApiContracts.PaymentScheduleType.Interval();
@@ -63,6 +63,8 @@ const recurringMonthly = (cardDetails, product, user) => {
     createRequest.getJSON(),
   );
 
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
+
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
       const apiResponse = ctrl.getResponse();
@@ -75,10 +77,12 @@ const recurringMonthly = (cardDetails, product, user) => {
       if (response != null) {
         if (
           response.getMessages().getResultCode() ==
-          ApiContracts.MessageTypeEnum.OK
+          ApiContracts.MessageTypeEnum.OK 
         )
           resolve(response.getSubscriptionId());
-        else reject(response.getMessages().getMessage()[0].getText());
+        else {
+            reject(response.getMessages().getMessage()[0].getText());
+        }
       } else {
         reject("Null response received");
       }

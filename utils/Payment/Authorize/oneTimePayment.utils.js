@@ -10,7 +10,7 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
 
   merchantAuthenticationType.setName(process.env.AUTHORIZE_API_LOGIN_KEY);
   merchantAuthenticationType.setTransactionKey(
-    process.env.AUTHORIZE_API_TRANSACTION_KEY,
+    process.env.AUTHORIZE_API_TRANSACTION_KEY
   );
 
   const creditCard = new ApiContracts.CreditCardType();
@@ -23,7 +23,7 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
 
   const orderDetails = new ApiContracts.OrderType();
   orderDetails.setInvoiceNumber(
-    `INV-JP-${Math.floor(Math.random() * 1000000)}`,
+    `INV-JP-${Math.floor(Math.random() * 1000000)}`
   );
   orderDetails.setDescription(product.name);
 
@@ -53,7 +53,7 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
 
   const transactionRequestType = new ApiContracts.TransactionRequestType();
   transactionRequestType.setTransactionType(
-    ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION,
+    ApiContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION
   );
   transactionRequestType.setPayment(paymentType);
   transactionRequestType.setAmount(parseFloat(cardDeduction).toFixed(2));
@@ -65,8 +65,12 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
   createRequest.setTransactionRequest(transactionRequestType);
 
   const ctrl = new ApiControllers.CreateTransactionController(
-    createRequest.getJSON(),
+    createRequest.getJSON()
   );
+  //set environment to sandbox
+  // ctrl.setEnvironment("https://apitest.authorize.net/xml/v1/request.api");
+  // set environment to production
+  ctrl.setEnvironment("https://api.authorize.net/xml/v1/request.api");
 
   return new Promise((resolve, reject) => {
     ctrl.execute(() => {
@@ -77,17 +81,23 @@ const oneTimePayment = (cardDetails, product, cardDeduction) => {
       if (response != null) {
         if (
           response.getMessages().getResultCode() ==
-          ApiContracts.MessageTypeEnum.OK
+            ApiContracts.MessageTypeEnum.OK &&
+          response.getTransactionResponse().getErrors() == null
         )
           resolve(response.getMessages().getMessage()[0].getText());
-        else
-          reject(
-            response
-              .getTransactionResponse()
-              .getErrors()
-              .getError()[0]
-              .getErrorText(),
-          );
+        else {
+          if (response.getTransactionResponse().getErrors() != null)
+            reject(
+              response
+                .getTransactionResponse()
+                .getErrors()
+                .getError()[0]
+                .getErrorText()
+            );
+          else {
+            reject(response.getMessages().getMessage()[0].getText());
+          }
+        }
       } else {
         reject("Null response received");
       }

@@ -26,6 +26,7 @@ routes.getPackage = async (req, res) => {
   try {
     const uid = req.userId;
     const id = req.params.id;
+    console.log(id, uid);
     const package = await packageModel.findById(id);
     const user = await userModel.findById(uid).populate("package");
 

@@ -575,7 +575,7 @@ routes.createReccuringOrderMonthlyAuthorize = async (req, res) => {
     try {
       response = await recurringMonthly(cardDetails, package, user);
     } catch (error) {
-      return res.status(500).json({ error });
+      return res.status(400).json({ error });
     }
 
     const order = await reccuringOrderModel.create({
@@ -640,7 +640,7 @@ routes.createReccuringOrderYearlyAuthorize = async (req, res) => {
     try {
       response = await recurringMonthly(cardDetails, package, user);
     } catch (error) {
-      return res.status(500).json({ error });
+      return res.status(400).json({ error });
     }
 
     const order = await reccuringOrderModel.create({
