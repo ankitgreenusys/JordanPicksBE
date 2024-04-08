@@ -278,7 +278,7 @@ routes.resetPassOTP = async (req, res) => {
     await user.save();
 
     console.log(otp);
-
+    
     await sendResetPassword(
       user.email,
       user.name,
@@ -289,7 +289,7 @@ routes.resetPassOTP = async (req, res) => {
     return res.status(201).json({ msg: "Email sent" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: "internal server error" });
+    return res.status(500).json({ error });
   }
 };
 

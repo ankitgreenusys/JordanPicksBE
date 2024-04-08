@@ -41,6 +41,7 @@ const sendResetPassword = async (email, name, otp, title) => {
     return result;
   } catch (error) {
     console.log(error);
+    throw new error(error.message)
   }
 };
 
