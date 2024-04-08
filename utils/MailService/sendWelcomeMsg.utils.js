@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const SibApiV3Sdk = require("@getbrevo/brevo");
 
 const emailtemplateotp = (link) => {
   return `
@@ -186,28 +187,48 @@ const emailtemplateotp = (link) => {
   `;
 };
 
+// const sendOTP = async (email, otp, title) => {
+//   try {
+//     const transporter = nodemailer.createTransport({
+//       host: process.env.MAIL_HOST,
+//       port: process.env.MAIL_PORT,
+//       secure: true,
+//       auth: {
+//         user: process.env.MAIL_EMAIL,
+//         pass: process.env.MAIL_PASSWORD,
+//         // refreshToken: process.env.REFRESH_TOKEN,
+//       },
+//     });
+
+//     const mailOptions = {
+//       from: { name: process.env.MAIL_USER, address: process.env.MAIL_EMAIL },
+//       to: email,
+//       subject: title,
+//       html: emailtemplateotp(otp),
+//     };
+
+//     const result = await transporter.sendMail(mailOptions);
+//     // console.log(result);
+//     return result;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
 const sendOTP = async (email, otp, title) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_EMAIL,
-        pass: process.env.MAIL_PASSWORD,
-        // refreshToken: process.env.REFRESH_TOKEN,
-      },
-    });
-
-    const mailOptions = {
-      from: { name: process.env.MAIL_USER, address: process.env.MAIL_EMAIL },
-      to: email,
-      subject: title,
-      html: emailtemplateotp(otp),
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const apiKey = apiInstance.authentications["apiKey"];
+    apiKey.apiKey = process.env.MAIL_API;
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.subject = title;
+    sendSmtpEmail.htmlContent = emailtemplateotp(otp);
+    sendSmtpEmail.sender = {
+      name: process.env.MAIL_USER,
+      email: process.env.MAIL_EMAIL,
     };
-
-    const result = await transporter.sendMail(mailOptions);
-    // console.log(result);
+    sendSmtpEmail.to = [{ email: email }];
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
     return result;
   } catch (error) {
     console.log(error);
